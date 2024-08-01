@@ -10,7 +10,7 @@ matplotalt is a Python library for automatically generating and displaying alt t
 
 ## Examples
 
-Documentation is available at matplotalt's read-the-docs page (link), including examples, API reference, and other useful information.
+Documentation is available at [matplotalt's read-the-docs page](https://matplotalt.readthedocs.io), including [examples](https://matplotalt.readthedocs.io/en/latest/notebooks/examples.html), [API reference](https://matplotalt.readthedocs.io/en/latest/api.html), and other useful information.
 
 matplotalt's ``generate_alt_text`` function will automatically generate alt text for the most recent matplotlib figure. The desc_level parameter controls how detailed the figure description is from 1 (least detail) to 3 (most) based on [Lundgard and Satyanarayan, 2021](https://arxiv.org/pdf/2110.04406).
 

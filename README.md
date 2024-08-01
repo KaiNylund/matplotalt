@@ -13,6 +13,8 @@ Documentation is available at [matplotalt's read-the-docs page](https://matplota
 matplotalt's ``generate_alt_text`` function will automatically generate alt text for the most recent matplotlib figure. The desc_level parameter controls how detailed the figure description is from 1 (least detail) to 3 (most) based on [Lundgard and Satyanarayan, 2021](https://arxiv.org/pdf/2110.04406).
 
 ```
+from matplotalt import generate_alt_text, surface_alt_text, show_with_alt
+
 def sunshine_bars():
     sunshine_hours = [69, 108, 178, 207, 253, 268, 312, 281, 221, 142, 72, 52]
     months = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"]

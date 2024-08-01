@@ -1,0 +1,30 @@
+[project]
+name = "matplotalt"
+version = "0.0.1"
+authors = [
+  {name="Kai Nylund", email="knylund@cs.washington.com"},
+  {name="Venkatesh Potluri", email="vpotluri@cs.washington.edu"}
+]
+maintainers = [
+  {name="Kai Nylund", email="knylund@cs.washington.com"}
+]
+description = "A package to sutomatically generate and surface alt text for matplotlib figures"
+keywords = ["alt text", "Jupyter", "matplotlib", "seaborn", "LLMs"]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/KaiNylund/matplotalt"
+Issues = "https://github.com/KaiNylund/matplotalt/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+alttextify = "matplotalt.alttextify_notebook:main"

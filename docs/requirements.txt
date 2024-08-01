@@ -1,0 +1,3 @@
+sphinx.ext.napoleon
+sphinx.ext.autosectionlabel
+nbsphinx

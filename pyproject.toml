@@ -1,6 +1,6 @@
 [project]
 name = "matplotalt"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   {name="Kai Nylund", email="knylund@cs.washington.com"},
   {name="Venkatesh Potluri", email="vpotluri@cs.washington.edu"}
@@ -9,7 +9,7 @@ maintainers = [
   {name="Kai Nylund", email="knylund@cs.washington.com"}
 ]
 description = "A package for adding alt text to matplotlib figures in computational notebooks"
-keywords = ["alt text", "Jupyter", "matplotlib", "seaborn", "LLMs"]
+keywords = ["alt text", "matplotlib", "Jupyter", "IPython", "seaborn", "LLMs"]
 readme = "README.md"
 
 requires-python = ">=3.8"
@@ -20,21 +20,20 @@ classifiers = [
 ]
 
 dependencies = [
-  "ipython>=8.12.3"
-  "matplotlib>=3.8.0"
-  "nbconvert>=7.16.4"
-  "nbformat>=5.10.4"
-  "numpy>=2.0.1"
-  "openai>=1.37.1"
-  "Pillow>=10.4.0"
-  "pyexiv2>=2.14.0"
-  "python_dateutil>=2.8.2"
-  "scipy>=1.11.4"
-  "webcolors>=1.13"
+  "ipython>=8.12.3",
+  "matplotlib>=3.8.0",
+  "nbconvert>=7.16.4",
+  "nbformat>=5.10.4",
+  "numpy>=2.0.1",
+  "openai>=1.37.1",
+  "Pillow>=10.4.0",
+  "pyexiv2>=2.14.0",
+  "python_dateutil>=2.8.2",
+  "scipy>=1.11.4",
 ]
 
 [project.optional-dependencies]
-model = "transformers>=4.37.2"
+model = ["transformers>=4.37.2"]
 
 
 [project.urls]

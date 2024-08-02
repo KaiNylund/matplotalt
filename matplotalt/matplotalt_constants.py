@@ -55,3 +55,27 @@ CHART_TYPE_ANSWER_PATTERNS = [
     r"a (.*) (chart)|(diagram)|(plot)",
     r"the (.*) (chart)|(diagram)|(plot)",
 ]
+
+HEX_COLOR_TO_NAME = {
+    "FF0000": "red",
+    "00FFFF": "cyan",
+    "0000FF": "blue",
+    "4682B4": "dark blue",
+    "ADD8E6": "light blue",
+    "800080": "purple",
+    "FFFF00": "yellow",
+    "00FF00": "lime",
+    "FF00FF": "magenta",
+    "FFC0CB": "pink",
+    "FFFFFF": "white",
+    "C0C0C0": "light gray",
+    "808080": "gray",
+    "000000": "black",
+    "FFA500": "orange",
+    "5C3317": "brown",
+    "800000": "maroon",
+    "008000": "green",
+    "808000": "olive",
+    "254117": "forest green",
+    "7FFFD4": "aquamarine",
+}

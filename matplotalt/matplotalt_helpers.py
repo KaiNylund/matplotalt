@@ -175,7 +175,7 @@ def get_arr_shape(arr, arr_ticklabels, var_label="data", generally_thresh=0.65, 
 # Nice one-liner from john1024 at https://stackoverflow.com/questions/29643352
 def hex_to_rgb(h):
     """Convert hex code to rgb triplet"""
-    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    return tuple(int(h[i:i+2], 16) / 255 for i in (0, 2, 4))
 
 
 # From https://stackoverflow.com/questions/60676893
@@ -191,17 +191,16 @@ def get_color_name(color_input):
     """Converts hex codes and rgb triplets to a color name like 'darkblue'"""
     if isinstance(color_input, str):
         if "#" in color_input:
-            rgb_triplet = matplotlib.colors.to_rgb(color_input)
-        else:
-            return color_input
+            color_input = color_input[1:]
+        rgb_triplet = hex_to_rgb(color_input)
     elif isinstance(color_input, (tuple, list, np.ndarray)):
         rgb_triplet = color_input
     else:
         raise ValueError("Input of unknown type to get_color_name")
 
     min_colors = {}
-    for key, name in webcolors.CSS3_HEX_TO_NAMES.items():
-        r_c, g_c, b_c = matplotlib.colors.to_rgb(key)
+    for hex_val, name in HEX_COLOR_TO_NAME.items():
+        r_c, g_c, b_c = hex_to_rgb(hex_val)
         rd = (r_c - rgb_triplet[0]) ** 2
         gd = (g_c - rgb_triplet[1]) ** 2
         bd = (b_c - rgb_triplet[2]) ** 2

@@ -51,7 +51,7 @@ sunshine_bars()
 show_with_alt(desc_level=3, methods=["html", "table"])
 ```
 
-There are also "API" versions of each function (``show_with_api_alt``, ``generate_api_alt``) which generate alt text using a LLM through OpenAI and Azure APIs.
+There are also "API" versions of each function (``show_with_api_alt``, ``generate_api_alt_text``) which generate alt text using a LLM through OpenAI and Azure APIs.
 
 matplotalt provides the ``alttextify`` command to automatically add alt text to each matplotlib figure in a IPython notebook. For example,
 

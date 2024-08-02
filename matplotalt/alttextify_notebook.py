@@ -1,7 +1,7 @@
-import argparse
-import nbformat
 import os
 import re
+import argparse
+import nbformat
 from copy import deepcopy
 from nbconvert.preprocessors import ExecutePreprocessor
 

@@ -1,5 +1,5 @@
-from openai import OpenAI, AzureOpenAI
 import os
+from openai import OpenAI, AzureOpenAI
 
 # model="TURBO" model="gpt-4-vision-preview"
 def get_openai_vision_response(api_key, prompt, base64_img, model="gpt-4-vision-preview", use_azure=False,

@@ -1,12 +1,8 @@
 import numpy as np
-import warnings
-import sys
 from copy import deepcopy
 from scipy.stats import pearsonr
 from collections import OrderedDict, defaultdict
-import os
 
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from matplotalt_helpers import *
 from matplotalt_constants import *
 

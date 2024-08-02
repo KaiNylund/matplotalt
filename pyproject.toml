@@ -8,7 +8,7 @@ authors = [
 maintainers = [
   {name="Kai Nylund", email="knylund@cs.washington.com"}
 ]
-description = "A package to sutomatically generate and surface alt text for matplotlib figures"
+description = "A package for adding alt text to matplotlib figures in computational notebooks"
 keywords = ["alt text", "Jupyter", "matplotlib", "seaborn", "LLMs"]
 readme = "README.md"
 requires-python = ">=3.8"
@@ -20,6 +20,8 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/KaiNylund/matplotalt"
+Documentation = "https://matplotalt.readthedocs.io/en/latest/"
+Discussions = "https://github.com/KaiNylund/matplotalt/discussions"
 Issues = "https://github.com/KaiNylund/matplotalt/issues"
 
 [build-system]

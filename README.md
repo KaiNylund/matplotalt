@@ -1,6 +1,6 @@
 # matplotalt
 
-matplotalt is a Python library for generating and displaying matplotlib figure alt text. matplotalt is designed to make figures in IPython notebooks and Python scripts more accessible to screen readers.
+matplotalt is a Python library for generating and displaying matplotlib figure alt text in computational notebooks.
 
 ## Installation
 

@@ -1,18 +1,13 @@
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
-import warnings
-import secrets
-from copy import deepcopy
-from IPython.core.getipython import get_ipython
-from IPython.display import display, Markdown, HTML
-from PIL import Image
-import pyexiv2
 import os
 import re
-import sys
-
-#sys.path.append(os.path.dirname(__file__))
+import secrets
+import pyexiv2
+import warnings
+import numpy as np
+from PIL import Image
+import matplotlib
+import matplotlib.pyplot as plt
+from IPython.display import display, Markdown, HTML
 
 from matplotalt_constants import *
 from matplotalt_helpers import *

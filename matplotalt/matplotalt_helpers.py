@@ -1,19 +1,17 @@
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
-import webcolors
-from IPython.core.getipython import get_ipython
-from PIL import Image
-import base64
 import io
 import re
-import sys
+import base64
 import warnings
+import webcolors
+import numpy as np
+from PIL import Image
 import dateutil.parser
 from scipy import stats
+import matplotlib
+import matplotlib.pyplot as plt
 from collections import OrderedDict
+from IPython.core.getipython import get_ipython
 
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from matplotalt_constants import *
 
 # Store as a global var so we don't have to reload the model between cells

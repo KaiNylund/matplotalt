@@ -51,7 +51,7 @@ CHART_TYPE_TO_ID = {
 }
 
 CHART_TYPE_ANSWER_PATTERNS = [
-    r"it's a (.*) (chart)|(diagram)|(plot)",
+    r"it\'s a (.*) (chart)|(diagram)|(plot)",
     r"a (.*) (chart)|(diagram)|(plot)",
     r"the (.*) (chart)|(diagram)|(plot)",
 ]

@@ -146,7 +146,7 @@ def surface_alt_text(alt_text, methods=["html"], output_file=None):
 
     if "txt_file" in methods or "img_file" in methods:
         if not output_file:
-            chart_title = re.findall("titled \'(.*?)\'\.", alt_text.replace("\n", ""))
+            chart_title = re.findall(r"titled \'(.*?)\'\.", alt_text.replace("\n", ""))
             if len(chart_title) > 0:
                 output_file = f"mpa_{url_safe(chart_title[0])}"
             else:

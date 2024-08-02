@@ -1,8 +1,6 @@
 matplotalt API reference
 ========================
 
-matplotalt functions
-
 +-----------------------------------------+
 | matplotalt functions                    |
 +=========================================+
@@ -23,7 +21,6 @@ matplotalt functions
 | :func:`matplotalt.get_desc_level_prompt`|
 +-----------------------------------------+
 
-ChartDescription child classes
 
 +-----------------------------------------------------------+
 | ChartDescription child classes                            |

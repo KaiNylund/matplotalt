@@ -8,5 +8,3 @@ Pillow==10.4.0
 pyexiv2==2.14.0
 python_dateutil==2.8.2
 scipy==1.11.4
-transformers==4.37.2
-webcolors==1.13

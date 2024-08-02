@@ -2,7 +2,6 @@ import io
 import re
 import base64
 import warnings
-import webcolors
 import numpy as np
 from PIL import Image
 import dateutil.parser

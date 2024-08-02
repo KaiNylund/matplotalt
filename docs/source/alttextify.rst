@@ -12,7 +12,7 @@ The alttextify command
 Additional notes:
 
  * Only cell outputs will be changed after running ``alttextify`` on a notebook. All code in cells will stay the same.
- * If there are any errors in the notebook, then alt text will not be added to figures beyond that point
+ * Alt text will not be added to cells with errors
  * Any cells that take longer than timeout seconds to run will be skipped
 
 usage: alttextify [-h] [-l DESC_LEVEL] [-s SURFACE_METHODS [SURFACE_METHODS ...]] [-ht] [-t TIMEOUT] [-c CONTEXT]

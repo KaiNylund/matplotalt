@@ -176,6 +176,7 @@ def surface_alt_text(alt_text, methods=["html"], output_file=None):
         # Save alt text to the given output file
         with open(f"{output_file}.txt", "w") as output_file:
             output_file.write(alt_text)
+    plt.show()
 
 
 # TODO: Add option to output alt text as a latex command
@@ -375,7 +376,7 @@ def get_api_chart_type(api_key, base64_img, model="gpt-4-vision-preview", use_az
     return "other"
 
 
-def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=200):
+def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=225):
     """ Returns a prompt to generate alt text from a figure based on the given description level.
 
     Args:
@@ -426,7 +427,7 @@ def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=200):
 def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_type=None,
                          model="gpt-4-vision-preview", use_azure=False,
                          use_starter_alt_in_prompt=True, include_table=False,
-                         max_tokens=200, **kwargs):
+                         max_tokens=225, **kwargs):
     """
     Return AI generated alt text for the current figure and axes.
 
@@ -464,7 +465,7 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
             Whether to include a markdown table with the chart's data in both starter and
             LLM-generated alt texts. Defaults to False.
         max_tokens (int, optional):
-            The maximum number of tokens in the LLM-generated response. Defaults to 200.
+            The maximum number of tokens in the LLM-generated response. Defaults to 225.
 
     Returns:
         str: The LLM-generated alt text for the matplotlib figure. If there are
@@ -491,7 +492,7 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
     # Optionally include starter alt text from a template and/or figure data in the prompt
     starter_desc = None
     data_md_table = ""
-    if use_starter_alt_in_prompt or include_table:
+    if (use_starter_alt_in_prompt and (prompt in [None, ""])) or include_table:
         chart_desc = generate_alt_text(chart_type=chart_type, desc_level=desc_level,
                                        include_table=include_table, **kwargs)
         table_start = chart_desc.lower().find("data table:")
@@ -501,7 +502,8 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
         if use_starter_alt_in_prompt:
             starter_desc = chart_desc
 
-    prompt = get_desc_level_prompt(desc_level, starter_desc=starter_desc, max_tokens=max_tokens)
+    if prompt in [None, ""]:
+        prompt = get_desc_level_prompt(desc_level, starter_desc=starter_desc, max_tokens=max_tokens)
     api_response = get_openai_vision_response(api_key, prompt, base64_img, model=model,
                                               use_azure=use_azure, max_tokens=max_tokens,
                                               return_full_response=False)
@@ -513,7 +515,7 @@ def show_with_api_alt(api_key=None, prompt=None,
                       fig=None, desc_level=4, chart_type=None,
                       model="gpt-4-vision-preview", use_azure=False,
                       use_starter_alt_in_prompt=True, methods=["html"],
-                      max_tokens=200, context="",
+                      max_tokens=225, context="",
                       output_file=None, return_alt=False,
                       **kwargs):
     """
@@ -554,7 +556,7 @@ def show_with_api_alt(api_key=None, prompt=None,
         use_starter_alt_in_prompt (bool, optional):
             Whether to use heuristic-generated alt text for the current figure in the prompt.
         max_tokens (int, optional):
-            The maximum number of tokens in the LLM-generated response. Defaults to 200.
+            The maximum number of tokens in the LLM-generated response. Defaults to 225.
         context (str, optional):
             Extra context which will be appended to automatically generated alt text.
         output_file (str|None, optional):

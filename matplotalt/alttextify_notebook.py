@@ -11,14 +11,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("notebook_path", help="path of notebook to alttextify")
     parser.add_argument("output_path", nargs='?', default=None, help="path to outputted notebook with figure alt text. If none is given, defaults to the notebook name + '_with_alt'. If --to_html, this is also the name of the outputted html file")
-    parser.add_argument('-l', '--desc_level', type=int, default=2, help="The description semantic level from Lundgard & Satyanarayan 2022. Level 1 includes encoding and axis descriptions. Level 2 adds statistics for the underlying data. Level 3 adds trends and variable comparisons.")
+    parser.add_argument('-l', '--desc_level', type=int, default=None, help="The description semantic level from Lundgard & Satyanarayan 2022. Level 1 includes encoding and axis descriptions. Level 2 adds statistics for the underlying data. Level 3 adds trends and variable comparisons.")
     parser.add_argument('-s', '--surface_methods', nargs='+', default=["html"], help="How the alt description should be surfaced in the notebook. Choices are 'html', 'markdown', 'new_cell', 'txt_file', 'img_file', 'md_table'")
     parser.add_argument('-ht', '--to_html', default=False, action='store_true', help="If given, notebook is also exported to html at the given file path.")
     parser.add_argument('-t', '--timeout', type=int, default=600, help="timeout for running each cell")
     parser.add_argument('-c', '--context', type=str, default="", help="text appended to alt text generated for each plot")
     parser.add_argument('-k', '--api_key', type=str, default=None, help="The OpenAI / Azure key to use when querying the LLM. If a key is given, will use show_with_api_alt, else uses show_with_alt")
     parser.add_argument('-m', '--model',   type=str, default="gpt-4-vision-preview", help="The name of the LLM to use to generate alt text.")
-    parser.add_argument('-p', '--prompt',  type=str, default=None, help="The prompt given to the LLM. If none is given, it is automatically generated based on the desc_level. Note, adding a prompt through this field will overwrite starter alt text from --use_starter_alt")
+    parser.add_argument('-p', '--prompt',  type=str, default="", help="The prompt given to the LLM. If none is given, it is automatically generated based on the desc_level. Note, adding a prompt through this field will overwrite starter alt text from --use_starter_alt")
     parser.add_argument('-us', '--use_starter_alt', default=False, action='store_true', help="Whether starter heuristic-based alt text should be used in the prompt to the LLM")
     parser.add_argument('-ua', '--use_azure', default=False, action='store_true', help="Whether to load the model from microsoft Azure.")
     args = parser.parse_args()
@@ -31,18 +31,21 @@ def main():
         global args
         def __init__(self, *nonkwargs, **kwargs):
             super().__init__(*nonkwargs, **kwargs)
-            print(args)
-            print(str(args.surface_method))
             self.alt_textify_snippet = "\n\nimport matplotlib.pyplot as plt\nif len(plt.gcf().axes) > 0:\n\t"
             if args.api_key is None:
-                self.alt_textify_snippet += f"from matplotalt import show_with_alt\n\tshow_with_alt(methods={str(args.surface_method)}, desc_level={args.desc_level}, context={args.context})"
+                if args.desc_level is None:
+                    args.desc_level = 2
+                self.alt_textify_snippet += f"from matplotalt import show_with_alt\n\tshow_with_alt(methods={str(args.surface_methods)}, desc_level={args.desc_level}, context='{args.context}')"
             else:
-                self.alt_textify_snippet += f"from matplotalt import show_with_api_alt\n\tshow_with_api_alt(api_key={args.api_key}, model={args.model}, prompt={args.prompt}, methods={str(args.surface_method)}, desc_level={args.desc_level}, context={args.context}, use_starter_alt_in_prompt={args.use_starter_alt}, use_azure={args.use_azure})"
+                if args.desc_level is None:
+                    args.desc_level = 4
+                self.alt_textify_snippet += f"from matplotalt import show_with_api_alt\n\tshow_with_api_alt(api_key='{args.api_key}', model='{args.model}', prompt='{args.prompt}', methods={str(args.surface_methods)}, desc_level={args.desc_level}, context='{args.context}', use_starter_alt_in_prompt={args.use_starter_alt}, use_azure={args.use_azure})"
             self.found_aliases = False
             # import matplotlib.pyplot as plt
             self.pyplot_alias = "plt"
             # import matplotlib as mpl
             self.matplotlib_alias = "matplotlib"
+            self.cell_num = 0
 
 
         def preprocess_cell(self, cell, resources, index):
@@ -81,8 +84,14 @@ def main():
                 # If we didn't replace any calls to .show(), just add the snippet at the end of the cell
                 if len(cell["source"]) == len(unmodified_source):
                     cell["source"] = cell["source"] + self.alt_textify_snippet
-            cell = self.execute_cell(cell, index, store_history=True)
+            try:
+                cell = self.execute_cell(cell, index, store_history=True)
+                print(f"Processed cell {self.cell_num}")
+            except Exception as e:
+                print(f"Failed to execute cell {self.cell_num}:")
+                print(e)
             cell["source"] = unmodified_source
+            self.cell_num += 1
             return cell, self.resources
 
 
@@ -91,9 +100,10 @@ def main():
         nb = nbformat.read(f, as_version=4)
 
     ep.preprocess(nb)
-    with open(f"{args.output_path}", 'w', encoding="utf-8") as f:
-        nbformat.write(nb, f)
 
+    print("Saving...")
+    with open(f"{args.output_path.split('.')[0]}.ipynb", 'w', encoding="utf-8") as f:
+        nbformat.write(nb, f)
     if args.to_html:
         os.system(f"jupyter nbconvert --to html {args.output_path.split('.')[0]}")
 

@@ -4,7 +4,9 @@ matplotalt is a Python library for generating and displaying matplotlib figure a
 
 ## Installation
 
-(Coming soon!)
+The latest release can be installed from PyPI:
+
+``` pip install matplotalt ```
 
 ## Examples
 

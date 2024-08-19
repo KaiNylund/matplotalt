@@ -20,6 +20,7 @@ CHART_TYPE_TO_CLASS = {
     "bar":     BarDescription,
     "scatter": ScatterDescription,
     "area":    AreaDescription,
+    "image":   ImageDescription,
     "heatmap": HeatmapDescription,
     "boxplot": BoxplotDescription,
     "pie":     PieDescription,
@@ -70,8 +71,10 @@ def get_cur_chart_desc_class(ax=None, chart_type=None, include_warnings=False,
             Whether to display warnings when creating  the ChartDescription. Defaults to False.
         chart_type_classifier (str, optional):
             How to infer the given axis' chart type. Currently supported methods are
+
             * "auto": Use the first ChartDescription class that is created without errors
             * "model": Use a finetuned vision model to classify the chart type
+
             Defaults to "auto".
 
     Raises:
@@ -107,24 +110,27 @@ def surface_alt_text(alt_text, methods=["html"], output_file=None):
             The given text to display
         methods (List[str], optional):
             The methods used to display alt text in Jupyter. Currently supported methods are:
+
             * "html": displays the last figure in html with an alt property containing the given text.
             * "markdown": display text in markdown in the current cell output.
             * "new_cell": create a new (code) cell after this one containing the markdown magic followed by the given text.
             * "txt_file": writes the given text to a text file at output_file.
             * "img_file": saves the last matplotlib figure to output_file with the given text in its alt property.
+
             Defaults to "html" in notebooks and None in non-interactive environments.
             NOTE: markdown data tables are excluded from all but the "markdown" and "new_cell" methods
             NOTE: "html", "markdown", and "new_cell" are only supported in notebooks
         output_file (str|None, optional):
-            The output file name to use for html and txt_file methods. If None is given,
-            defaults to "mpa_" plus the title of the last matplotlib chart. If None is
-            given and there's no title, defaults to "matplotalt_tmp_" plus a hash.
+            The output file name to use for html and txt_file methods. If the file already exists,
+            defaults to output_file plus a hash. If None is given, defaults to "mpa_" plus the
+            title of the last matplotlib chart. If None is given and there's no title,
+            defaults to "mpa_" plus a hash.
 
 
     Returns:
         None
     """
-    if methods is None:
+    if methods is None or len(methods) < 1:
         return
     elif isinstance(methods, str):
         methods = [methods]
@@ -137,13 +143,12 @@ def surface_alt_text(alt_text, methods=["html"], output_file=None):
     if is_env_notebook and "new_cell" in methods:
         # Create a new (code) cell with the given alt text
         create_new_cell("%%markdown\n" + alt_text)
-
     # Exclude markdown data tables and newlines from the following methods:
     dt_start_idx = alt_text.lower().find("data table:")
     if dt_start_idx != -1:
         alt_text = alt_text[:dt_start_idx]
     alt_text = alt_text.replace("\n", "")
-
+    # Create output file if needed
     if "txt_file" in methods or "img_file" in methods:
         if not output_file:
             chart_title = re.findall(r"titled \'(.*?)\'\.", alt_text.replace("\n", ""))
@@ -152,7 +157,10 @@ def surface_alt_text(alt_text, methods=["html"], output_file=None):
             else:
                 output_file = "matplotalt_tmp_" + secrets.token_urlsafe(16)
         else:
-            output_file = output_file.split(".")[0]
+            output_file = os.path.abspath(output_file).split(".")[0]
+        if os.path.exists(output_file + ".txt") or os.path.exists(output_file + ".jpg"):
+            output_file += "_" + secrets.token_urlsafe(16)
+    # Methods that need to draw the figure
     if "html" in methods or "img_file" in methods:
         fig = plt.gcf()
         fig.canvas.draw()
@@ -198,15 +206,19 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
         desc_level (int, optional):
             The semantic level to use in alt text descriptions based on Lundgard and
             Satyanarayan 2021. Defaults to 2. Currently supported description levels are:
+
             1. axis and encoding descriptions
             2. level 1 plus statistics about the chart's data
             3. level 2 plus trends in the data and relationships between variables
+
         include_warnings (bool, optional):
             Whether to display warnings when creating  the ChartDescription. Defaults to False.
         chart_type_classifier (str, optional):
             How to infer the given axis' chart type. Currently supported methods are
+
             * "auto": Use the first ChartDescription class that is created without errors
             * "model": Use a finetuned vision model to classify the chart type
+
             Defaults to "auto".
         include_table (bool, optional):
             Whether to include a markdown table with the chart's data in the generated alt text.
@@ -229,10 +241,10 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
         fig = plt.gcf()
 
     alt_text = ""
-    # Remove colorbars from axs
+    # Dont generate alt text for colorbars
     colorbar_idxs = []
     for i in range(len(axs)):
-        if "_colorbar_info" in axs[i].__dict__:
+        if hasattr(axs[i], "_colorbar") or hasattr(axs[i], "_colorbar_info"):
             colorbar_idxs.append(i)
     for idx in sorted(colorbar_idxs, reverse=True):
         del axs[idx]
@@ -240,9 +252,11 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
     # Create alt text for all subplots + suptitle
     if isinstance(axs, (list, np.ndarray)) and len(np.array(axs).flatten()) > 1:
         flattened_axs = np.array(axs).flatten()
-        chart_title = " ".join(fig._suptitle.get_text().replace("\n", " ").strip().split())
+        chart_title = fig.get_suptitle()
+        if chart_title is not None:
+            chart_title = " ".join(chart_title.replace("\n", " ").strip().split())
         alt_text += f"A group of {len(flattened_axs)} subplots"
-        if chart_title != "":
+        if chart_title != None and chart_title != "":
             alt_text += f" titled \'{chart_title}\'."
         alt_text += "\n\n"
         for ax_idx, ax in enumerate(flattened_axs):
@@ -259,7 +273,8 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
             if len(axs) == 1:
                 ax = axs[0]
             else:
-                raise ValueError("Given axes are blank")
+                #raise ValueError("Given axes are blank")
+                return "The figure is blank"
         else:
             ax = axs
         chart_desc_class = get_cur_chart_desc_class(ax=ax, chart_type=chart_type, chart_type_classifier=chart_type_classifier, include_warnings=include_warnings)
@@ -305,9 +320,11 @@ def show_with_alt(alt_text=None, axs=None, fig=None, methods=["html"], chart_typ
         desc_level (int, optional):
             The description level to use in alt text descriptions based on Lundgard and
             Satyanarayan 2021. Defaults to 2. Currently supported description levels are:
-            1 - axis and encoding descriptions
-            2 - level 1 plus statistics about the chart's data
-            3 - level 2 plus trends in the data and relationships between variables
+
+            1. axis and encoding descriptions
+            2. level 1 plus statistics about the chart's data
+            3. level 2 plus trends in the data and relationships between variables
+
         context (str, optional):
             Extra context which will be appended to automatically generated alt text.
         output_file (str|None, optional):
@@ -446,10 +463,12 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
         desc_level (int, optional):
             The description level to use in alt text descriptions based on Lundgard and
             Satyanarayan 2021. Currently supported description levels are:
-            1 - axis and encoding descriptions
-            2 - level 1 plus statistics about the chart's data
-            3 - level 2 plus trends in the data and relationships between variables
-            4 - level 3 plus broader context which explains the data
+
+            1. axis and encoding descriptions
+            2. level 1 plus statistics about the chart's data
+            3. level 2 plus trends in the data and relationships between variables
+            4. level 3 plus broader context which explains the data
+
             Defaults to 4. Note that this parameter only changes the prompt and is
             not guarenteed to result in the desired level of description.
         chart_type (str, optional):
@@ -463,12 +482,12 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
             Whether to use heuristic-generated alt text for the current figure in the prompt.
         include_table (bool, optional):
             Whether to include a markdown table with the chart's data in both starter and
-            LLM-generated alt texts. Defaults to False.
+            VLM-generated alt texts. Defaults to False.
         max_tokens (int, optional):
-            The maximum number of tokens in the LLM-generated response. Defaults to 225.
+            The maximum number of tokens in the VLM-generated response. Defaults to 225.
 
     Returns:
-        str: The LLM-generated alt text for the matplotlib figure. If there are
+        str: The VLM-generated alt text for the matplotlib figure. If there are
         multiple axis objects in axs, returns the suptitle followed by alt text for each
         axis and their number.
     """
@@ -496,7 +515,8 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
         chart_desc = generate_alt_text(chart_type=chart_type, desc_level=desc_level,
                                        include_table=include_table, **kwargs)
         table_start = chart_desc.lower().find("data table:")
-        if include_table and table_start != -1: # Extract the data table from the chart desc if possible
+        # Extract the data table from the chart desc if possible
+        if include_table and table_start != -1:
             data_md_table = "\n\n" + chart_desc[table_start:]
             chart_desc = chart_desc[:table_start]
         if use_starter_alt_in_prompt:
@@ -507,6 +527,7 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
     api_response = get_openai_vision_response(api_key, prompt, base64_img, model=model,
                                               use_azure=use_azure, max_tokens=max_tokens,
                                               return_full_response=False)
+    api_response = "This description was generated by a language model. " + api_response
     #api_response = insert_line_breaks(api_response.strip(), max_line_width=max_alt_line_width)
     return api_response + data_md_table
 
@@ -536,10 +557,12 @@ def show_with_api_alt(api_key=None, prompt=None,
         desc_level (int, optional):
             The description level to use in alt text descriptions based on Lundgard and
             Satyanarayan 2021. Currently supported description levels are:
-            1 - axis and encoding descriptions
-            2 - level 1 plus statistics about the chart's data
-            3 - level 2 plus trends in the data and relationships between variables
-            4 - level 3 plus broader context which explains the data
+
+            1. axis and encoding descriptions
+            2. level 1 plus statistics about the chart's data
+            3. level 2 plus trends in the data and relationships between variables
+            4. level 3 plus broader context which explains the data
+
             Defaults to 4. Note that this parameter only changes the prompt and is
             not guarenteed to result in the desired level of description.
         chart_type (str, optional):
@@ -556,7 +579,7 @@ def show_with_api_alt(api_key=None, prompt=None,
         use_starter_alt_in_prompt (bool, optional):
             Whether to use heuristic-generated alt text for the current figure in the prompt.
         max_tokens (int, optional):
-            The maximum number of tokens in the LLM-generated response. Defaults to 225.
+            The maximum number of tokens in the VLM-generated response. Defaults to 225.
         context (str, optional):
             Extra context which will be appended to automatically generated alt text.
         output_file (str|None, optional):

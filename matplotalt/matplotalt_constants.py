@@ -12,7 +12,7 @@ LINE_STYLE_TO_DESC = {
 DEFAULT_DESC_CONFIG = {
     "stats": [],
     "trends": [],
-    "sig_figs": 3,
+    "sig_figs": 4,
     "max_color_desc_count": 5,
     "max_outliers_desc": 3,
     #"max_line_width": 80,
@@ -26,6 +26,7 @@ CHART_TYPE_TO_DESC = {
     "area":        "An area chart",
     "scatter":     "A scatter plot",
     "bar":         "A bar chart",
+    "image":       "An image",
     "heatmap":     "A heatmap",
     "boxplot":     "A boxplot",
     "sankey":      "A sankey diagram",

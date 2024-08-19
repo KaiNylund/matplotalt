@@ -5,6 +5,7 @@ from collections import OrderedDict, defaultdict
 
 from matplotalt_helpers import *
 from matplotalt_constants import *
+from stat_helpers import *
 
 
 ##################################################################################################
@@ -154,7 +155,7 @@ class ChartDescription():
         return ""
 
 
-    def get_encodings_desc(self, encoded_object_name="variables", max_color_desc_count=4):
+    def get_encodings_desc(self, encoded_obj_name="variables", max_color_desc_count=4):
         """
         Return a description of the color encodings for each variable in the figure of the form:
         '{variable_name} is plotted in {variable_color}'
@@ -164,7 +165,7 @@ class ChartDescription():
         (e.g. '12 groups of points are plotted for Jan, Feb,...')
 
         Attributes:
-            encoded_object_name (str, optional):
+            encoded_obj_name (str, optional):
                 the name of the encoded objects (e.g. 'groups of points', 'bars', 'lines') to use
                 in descriptions when there are more than max_color_desc_count variables.
 
@@ -180,7 +181,7 @@ class ChartDescription():
 
         if len(self.label_to_encoding) > 0:
             if len(self.label_to_encoding) > max_color_desc_count:
-                colors_desc += f"{len(self.label_to_encoding)} {encoded_object_name} are plotted for "
+                colors_desc += f"{len(self.label_to_encoding)} {encoded_obj_name} are plotted for "
                 colors_desc += format_list(self.label_to_encoding.keys()) + ". "
             else:
                 colors_desc += format_list([f"{label} is plotted in {encoding}" for label, encoding in self.label_to_encoding.items()]) + "."
@@ -314,6 +315,9 @@ class ChartDescription():
                 E.g. "hours of sunshine have 36 points"
                 Defaults to 'points'
 
+        Raises:
+            ValueError: if given an unsupported statistic
+
         Returns:
             list[str]: A list of the descriptions of each given stat
         """
@@ -367,6 +371,8 @@ class ChartDescription():
                     cur_stats_desc_arr.append(f"{STAT_NAME_TO_DESC_INTRO[stat_name]} {axs_stats}".strip())
                 else:
                     cur_stats_desc_arr.append(axs_stats)
+            else:
+                raise ValueError(f"Statistic {stat_name} cannot be computed for the current chart type")
         return cur_stats_desc_arr
 
 
@@ -375,6 +381,7 @@ class ChartDescription():
         Return a description of the provided statistics for each variable along the given axis.
 
         See :func:`~ChartDescription.get_data_stats_arr` for more details
+
         """
         stats_desc = ""
         ax_names = list(self.ax_name_to_data.keys())
@@ -440,6 +447,25 @@ class ChartDescription():
     def get_single_var_trends_desc(self, ax_name_to_data, ax_name_to_ticklabels, trend_axis="x",
                                    var_idx=None, var_label="data", trends=["shape"],
                                    generally_thresh=0.65, strictly_thresh=1.0, sig_figs=4):
+        """_summary_
+
+        Args:
+            ax_name_to_data (_type_): _description_
+            ax_name_to_ticklabels (_type_): _description_
+            trend_axis (str, optional): _description_. Defaults to "x".
+            var_idx (_type_, optional): _description_. Defaults to None.
+            var_label (str, optional): _description_. Defaults to "data".
+            trends (list, optional): _description_. Defaults to ["shape"].
+            generally_thresh (float, optional): _description_. Defaults to 0.65.
+            strictly_thresh (float, optional): _description_. Defaults to 1.0.
+            sig_figs (int, optional): _description_. Defaults to 4.
+
+        Raises:
+            ValueError: if given an unsupported trend type
+
+        Returns:
+            _type_: _description_
+        """
         cur_trends_desc_arr = []
         for trend in trends:
             trend = trend.split("_")
@@ -462,12 +488,26 @@ class ChartDescription():
                 cur_trends_desc_arr.append(get_arr_shape(axis_data, axis_ticklabels, var_label=var_label,
                                                          generally_thresh=generally_thresh,
                                                          strictly_thresh=strictly_thresh, sig_figs=sig_figs))
+            #else:
+            #    raise ValueError(f"Trend {trend_name} is unsupported for the current chart type.")
         return cur_trends_desc_arr
 
 
     def get_multi_var_trends_desc(self, ax_name_to_data, trend_axis="y",
                                   var_labels=[], trends=["correlation"],
                                   sig_figs=4):
+        """_summary_
+
+        Args:
+            ax_name_to_data (_type_): _description_
+            trend_axis (str, optional): _description_. Defaults to "y".
+            var_labels (list, optional): _description_. Defaults to [].
+            trends (list, optional): _description_. Defaults to ["correlation"].
+            sig_figs (int, optional): _description_. Defaults to 4.
+
+        Returns:
+            _type_: _description_
+        """
         cur_trends_desc_arr = []
         num_vars = len(var_labels)
         if num_vars < 2:
@@ -506,8 +546,15 @@ class ChartDescription():
 
 
     def get_trends_desc(self, trends=[], trend_axis="y", sig_figs=4):
-        """
-        Return a description of the trends for each variable along the given axis.
+        """ Return a description of the trends for each variable along the given axis.
+
+        Args:
+            trends (list, optional): _description_. Defaults to [].
+            trend_axis (str, optional): _description_. Defaults to "y".
+            sig_figs (int, optional): _description_. Defaults to 4.
+
+        Returns:
+            _type_: _description_
         """
         trends_desc = ""
         ax_names = list(self.ax_name_to_data.keys())
@@ -545,12 +592,13 @@ class ChartDescription():
                         var_labels = [f"variable {i}" for i in range(num_vars)]
 
                     for i, l in enumerate(var_labels):
-                        cur_trends_desc_arr.extend(self.get_single_var_trends_desc(self.ax_name_to_data, cur_ax_ticklabels,
-                                                                trend_axis=trend_axis,
-                                                                var_idx=i,
-                                                                var_label=l,
-                                                                trends=trends,
-                                                                sig_figs=sig_figs))
+                        cur_trends_desc_arr.extend(self.get_single_var_trends_desc(self.ax_name_to_data,
+                                                                                   cur_ax_ticklabels,
+                                                                                   trend_axis=trend_axis,
+                                                                                   var_idx=i,
+                                                                                   var_label=l,
+                                                                                   trends=trends,
+                                                                                   sig_figs=sig_figs))
                     cur_trends_desc_arr.extend(self.get_multi_var_trends_desc(self.ax_name_to_data,
                                                                               trend_axis=trend_axis,
                                                                               var_labels=var_labels,
@@ -562,11 +610,12 @@ class ChartDescription():
                         var_label = self.labels[0]
                     else:
                         var_label = "The data"
-                    cur_trends_desc_arr.extend(self.get_single_var_trends_desc(self.ax_name_to_data, cur_ax_ticklabels,
-                                                            trend_axis=trend_axis,
-                                                            var_label=var_label,
-                                                            trends=trends,
-                                                            sig_figs=sig_figs))
+                    cur_trends_desc_arr.extend(self.get_single_var_trends_desc(self.ax_name_to_data,
+                                                                               cur_ax_ticklabels,
+                                                                               trend_axis=trend_axis,
+                                                                               var_label=var_label,
+                                                                               trends=trends,
+                                                                               sig_figs=sig_figs))
                 trends_desc = " ".join(cur_trends_desc_arr)
         return trends_desc.strip()
 
@@ -847,13 +896,16 @@ class LineDescription(ChartDescription):
         # x and y that don't belong to vertical or horizontal lines
         self.x = []
         self.y = []
-        for line in self.lines:
+        constant_line_idxs = []
+        for i, line in enumerate(self.lines):
             cur_xs = line._xy[:, 0]
             cur_ys = line._xy[:, 1]
             if np.all(np.isclose(cur_xs, cur_xs[0])):
                 self.vline_xs.append(cur_xs[0])
+                constant_line_idxs.append(i)
             elif np.all(np.isclose(cur_ys, cur_ys[0])):
                 self.hline_ys.append(cur_ys[0])
+                constant_line_idxs.append(i)
             else:
                 if self.radial: # Skip last repeated index in radial line plots
                     self.x.append(line._xy[:-1, 0])
@@ -861,6 +913,11 @@ class LineDescription(ChartDescription):
                 else:
                     self.x.append(line._xy[:, 0])
                     self.y.append(line._xy[:, 1])
+        # Unless all lines are horizontal / vertical,
+        # remove lines that are constant on one axis so they aren't included in stats
+        if len(constant_line_idxs) < len(self.lines):
+            for i in constant_line_idxs:
+                del self.lines[i]
         if len(self.x) > 0:
             self.ax_name_to_data["x"] = self.x
         if len(self.y) > 0:
@@ -873,7 +930,7 @@ class LineDescription(ChartDescription):
         descriptions of any vertical and horizontal lines in the form:
         'There are vertical lines at "x"={vertical_line_xs}'
         """
-        encodings_desc = super().get_encodings_desc(encoded_object_name="lines", max_color_desc_count=max_color_desc_count, **kwargs)
+        encodings_desc = super().get_encodings_desc(encoded_obj_name="lines", max_color_desc_count=max_color_desc_count, **kwargs)
         if encodings_desc == "" and len(self.lines) == 1 and max_color_desc_count > 0:
             line = self.lines[0]
             encodings_desc += f" The data are plotted in {LINE_STYLE_TO_DESC[line.get_linestyle()]}{get_color_name(line._color)}. "
@@ -890,7 +947,7 @@ class LineDescription(ChartDescription):
 
     def get_stats_desc(self, stats=["min_y", "max_y", "mean_y"], stat_axis="y", **kwargs):
         """See :func:`~ChartDescription.get_stats_desc`"""
-        return super().get_stats_desc(stats=stats, stat_axis=stat_axis, **kwargs)
+        return super().get_stats_desc(stats=stats, stat_axis=stat_axis, encoded_obj_name="lines", **kwargs)
 
 
     def get_trends_desc(self, trends=["shape_y", "correlation_y"], trend_axis="y", **kwargs):
@@ -954,7 +1011,7 @@ class AreaDescription(ChartDescription):
         descriptions of any vertical and horizontal lines in the form:
         'There are vertical lines at x={vertical_line_xs}'
         """
-        encodings_desc = super().get_encodings_desc(encoded_object_name="areas", max_color_desc_count=max_color_desc_count, **kwargs)
+        encodings_desc = super().get_encodings_desc(encoded_obj_name="areas", max_color_desc_count=max_color_desc_count, **kwargs)
         if encodings_desc == "" and len(self.lines) == 1 and max_color_desc_count > 0:
             line = self.lines[0]
             encodings_desc += f" The data are plotted in {LINE_STYLE_TO_DESC[line.get_linestyle()]}{get_color_name(line._color)}. "
@@ -971,7 +1028,7 @@ class AreaDescription(ChartDescription):
 
     def get_stats_desc(self, stats=["min_y", "max_y", "mean_y"], stat_axis="y", **kwargs):
         """See :func:`~ChartDescription.get_stats_desc`"""
-        return super().get_stats_desc(stats, stat_axis=stat_axis, **kwargs)
+        return super().get_stats_desc(stats, stat_axis=stat_axis, encoded_obj_name="areas", **kwargs)
 
 
     def get_trends_desc(self, trends=["shape_y", "correlation_y"], trend_axis="y", **kwargs):
@@ -1023,14 +1080,14 @@ class BarDescription(ChartDescription):
 
     def get_encodings_desc(self, **kwargs):
         """See :func:`~ChartDescription.get_encodings_desc`"""
-        return super().get_encodings_desc(encoded_object_name="bars", **kwargs)
+        return super().get_encodings_desc(encoded_obj_name="bars", **kwargs)
 
 
-    def get_stats_desc(self, stats=["min", "max", "mean"], stat_axis=None, **kwargs):
+    def get_stats_desc(self, stats=["numpts", "min", "max", "mean"], stat_axis=None, **kwargs):
         """See :func:`~ChartDescription.get_stats_desc`"""
         if stat_axis is None:
             stat_axis = self.num_axis
-        return super().get_stats_desc(stats, stat_axis=stat_axis, **kwargs)
+        return super().get_stats_desc(stats, stat_axis=stat_axis, encoded_obj_name="bars", **kwargs)
 
 
     def get_trends_desc(self, trends=["shape", "correlation"], trend_axis=None, **kwargs):
@@ -1200,7 +1257,7 @@ class BoxplotDescription(ChartDescription):
         #if (len(self.label_to_encoding) == 0) and self.labels and (len(self.labels) > 0) and self.legend_handles:
         #    for i, label in enumerate(self.labels):
         #        self.label_to_encoding[label] = get_color_name(self.legend_handles[i]._facecolors[0])
-        return super().get_encodings_desc(encoded_object_name="boxplots", **kwargs)
+        return super().get_encodings_desc(encoded_obj_name="boxplots", **kwargs)
 
 
 
@@ -1219,6 +1276,7 @@ class BoxplotDescription(ChartDescription):
         Returns:
             str: The descriptions of each given stat
         """
+        # TODO: raise valueerror if given an unsupported stat
         stats_desc = ""
         for box_label, box_quartiles in self.box_num_to_quartiles.items():
             boxplot_stats_desc_arr = []
@@ -1272,7 +1330,12 @@ class HeatmapDescription(ChartDescription):
         and labels from the axis.
         """
         super().__init__(ax, fig, chart_type="heatmap", **kwargs)
-        self.quadmesh = self.ax.collections[0]
+        self.quadmesh = None
+        for ax_coll in self.ax.collections:
+            if isinstance(ax_coll, matplotlib.collections.QuadMesh):
+                self.quadmesh = ax_coll
+        if self.quadmesh is None:
+            raise ValueError("Heatmap axis does not contain a QuadMesh")
         self.coords = self.quadmesh._coordinates[:-1, :-1, :]
         self.shape = self.coords.shape[:2]
         self.coords = self.coords.reshape(-1, 2)
@@ -1310,6 +1373,80 @@ class HeatmapDescription(ChartDescription):
     def get_stats_desc(self, stats=["min_z", "max_z", "mean_z"], stat_axis="z", **kwargs):
         """See :func:`~ChartDescription.get_stats_desc`"""
         return super().get_stats_desc(stats=stats, stat_axis=stat_axis, encoded_obj_name="cells", **kwargs)
+
+
+
+##################################################################################################
+# Image Description
+##################################################################################################
+class ImageDescription(ChartDescription):
+    """
+    The class for generating image descriptions (e.g. those created with plt.imshow).
+    Has functions to automatically generate descriptions for encodings, axes, annotations,
+    statistics, trends and the overall chart. Infers chart data, encodings, etc...
+    from the figure attributes.
+
+    Attributes:
+        ax (matplotlib.axes._subplots.AxesSubplot):
+            The axis object for the chart to describe
+        fig (matplotlib.figure.Figure, optional):
+            The figure object for the chart to describe. If no figure is given, it is inferred
+            from plt.gcf()
+        **kwargs (optional):
+            Used to manually specify chart_type, data, and other details of chart descriptions
+            including number of signifigant figures, max line width, etc...
+    """
+    def __init__(self, ax, fig=None, **kwargs):
+        """
+        Initialize the ImageDescription with the given attributes. Infers x / y / z data
+        and labels from the axis.
+        """
+        super().__init__(ax, fig, chart_type="image", **kwargs)
+        self.ax_img = None
+        for ax_child in self.ax.get_children():
+            if isinstance(ax_child, matplotlib.image.AxesImage):
+                self.ax_img = ax_child
+        if self.ax_img is None:
+            raise ValueError("Image axis does not contain an AxesImage object")
+        self.data = self.ax_img._A
+        self.shape = self.data.shape
+        x, y = np.indices(self.shape)
+        self.x = x.ravel(order='F')
+        self.y = y.ravel(order='F')
+        self.z = self.data.ravel(order='F')
+        self.ax_name_to_data["x"] = self.x
+        self.ax_name_to_data["y"] = self.y
+        self.ax_name_to_data["z"] = self.z
+        if len(self.x) < 1 or len(self.y) < 1:
+            raise ValueError("Image is missing coordinates")
+        elif len(self.z) < 1:
+            raise ValueError("Image is missing values")
+        self.ax_name_to_ticklabels["x"] = np.tile(self.ax_name_to_ticklabels["x"], self.shape[1])
+        self.ax_name_to_ticklabels["y"] = np.repeat(self.ax_name_to_ticklabels["y"], self.shape[0])
+        if self.ax_img.colorbar is not None:
+            self.ax_name_to_label["z"] = self.ax_img.colorbar.ax.get_ylabel()
+            self.ax_name_to_ticklabels["z"] = [tl.get_text() for tl in self.ax_img.colorbar.ax.get_yticklabels()]
+        if "z" in self.ax_name_to_ticklabels and len(self.ax_name_to_ticklabels["z"]) > 0:
+            self.ax_name_to_type["z"] = get_ax_ticks_type(self.ax_name_to_ticklabels["z"])
+
+
+    def get_chart_type_desc(self):
+        """
+        Return a description of the current heatmap title of the form:
+        'A {heatmap_width}x{heatmap_height} titled {heatmap_title}'
+        """
+        chart_type_desc = f"A {self.shape[1]}x{self.shape[0]} image"
+        if self.title != "":
+            chart_type_desc += f" titled \'{self.title}\'"
+        chart_type_desc += ". "
+        return chart_type_desc
+
+
+    def get_stats_desc(self, stats=["min_z", "max_z", "mean_z"], stat_axis="z", **kwargs):
+        """See :func:`~ChartDescription.get_stats_desc`"""
+        return super().get_stats_desc(stats=stats, stat_axis=stat_axis, encoded_obj_name="pixels", **kwargs)
+
+
 
 
 
@@ -1371,6 +1508,7 @@ class ContourDescription(ChartDescription):
         Returns:
             str: The descriptions of each given stat
         """
+        # TODO: raise valueerror if given an unsupported stat
         stats_desc = ""
         if "max_center" in stats:
             max_center = f"({format_float(self.level_centers[-1][0], sig_figs=sig_figs)}, {format_float(self.level_centers[-1][1], sig_figs=sig_figs)})"

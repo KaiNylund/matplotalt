@@ -58,39 +58,38 @@ def infer_model_chart_type(ax=None, model="KaiNylund/chart-classifier-tiny"):
     elif containers and (len(containers[0]) > 0) and type(containers[0]) == matplotlib.lines.Line2D:
         return "line"
     else:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            #print("Cannot infer chart type from properties, using an automatic classifier...")
-            if chart_type_cls_model is None:
-                #print("Loading classifier...")
-                from transformers import AutoImageProcessor, AutoModelForImageClassification
-                chart_type_cls_model = AutoModelForImageClassification.from_pretrained(model, use_safetensors=True).to('cpu')
-                chart_type_cls_processor = AutoImageProcessor.from_pretrained(model)
-                chart_type_cls_model.eval()
+        #print("Cannot infer chart type from properties, using an automatic classifier...")
+        if chart_type_cls_model is None:
+            print("Loading classifier...")
+            from transformers import AutoImageProcessor, AutoModelForImageClassification
+            chart_type_cls_model = AutoModelForImageClassification.from_pretrained(model, use_safetensors=True).to('cpu')
+            chart_type_cls_processor = AutoImageProcessor.from_pretrained(model)
+            chart_type_cls_model.eval()
 
-            #print("Predicting chart type...")
-            fig = plt.gcf()
-            fig.canvas.draw()
-            fig_img = Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb());
-            inputs = chart_type_cls_processor(fig_img, return_tensors="pt");
-            logits = chart_type_cls_model(**inputs).logits;
+        #print("Predicting chart type...")
+        fig = plt.gcf()
+        fig.canvas.draw()
+        fig_img = Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb());
+        inputs = chart_type_cls_processor(fig_img, return_tensors="pt");
+        logits = chart_type_cls_model(**inputs).logits;
 
-            # If there's no PathCollection object then it's probably not a scatter plot
-            if matplotlib.collections.PathCollection not in ax_child_types:
-                logits[0][chart_type_cls_model.config.label2id["scatter"]] = -100000
-            # If there are no Line2D objects in get_lines, this probably isn't a line plot.
-            # Otherwise, manually upweight "line".
-            if len(ax.get_lines()) < 1:
-                logits[0][chart_type_cls_model.config.label2id["line"]] = -100000
-            else:
-                logits[0][chart_type_cls_model.config.label2id["line"]] *= 2
-            # Manually downweight "other" (when top logit is positive)
-            logits[0][chart_type_cls_model.config.label2id["other"]] /= 2
+        # Manual up/down weighting based on figure properties
+        # If there's no PathCollection object then it's probably not a scatter plot
+        #if matplotlib.collections.PathCollection not in ax_child_types:
+        #    logits[0][chart_type_cls_model.config.label2id["scatter"]] = -100000
+        # If there are no Line2D objects in get_lines, this probably isn't a line plot.
+        # Otherwise upweight "line".
+        #if len(ax.get_lines()) < 1:
+        #    logits[0][chart_type_cls_model.config.label2id["line"]] = -100000
+        #else:
+        #    logits[0][chart_type_cls_model.config.label2id["line"]] *= 2
+        # Downweight "other" (when top logit is positive)
+        #logits[0][chart_type_cls_model.config.label2id["other"]] /= 2
 
-            #print(logits)
-            predicted_label = logits.argmax(-1).item()
-            predicted_label = chart_type_cls_model.config.id2label[predicted_label]
-            #print(predicted_label)
+        #print(logits)
+        predicted_label = logits.argmax(-1).item()
+        predicted_label = chart_type_cls_model.config.id2label[predicted_label]
+        #print(predicted_label)
         return predicted_label
 
 
@@ -406,69 +405,3 @@ def create_md_table(headers_to_data, sig_figs=4):
 
 def url_safe(s):
     return re.sub("[^a-z0-9-_]", "", s.lower().replace(" ", "_"))
-
-
-def _max_sf(var_ax_data, ax_name_to_ticklabels=None, stat_axis=None, var_idx=None, sig_figs=None, **kwargs):
-    max_idx = np.nanargmax(var_ax_data[stat_axis])
-    max_pt = idx_pt_desc(max_idx, ax_name_to_ticklabels, stat_axis, var_idx=var_idx, sig_figs=sig_figs)
-    return f"{stat_axis}={format_float(var_ax_data[stat_axis][max_idx], sig_figs)}{max_pt}"
-
-def _min_sf(var_ax_data, ax_name_to_ticklabels=None, stat_axis=None, var_idx=None, sig_figs=None, **kwargs):
-    min_idx = np.nanargmin(var_ax_data[stat_axis])
-    min_pt = idx_pt_desc(min_idx, ax_name_to_ticklabels, stat_axis, var_idx=var_idx, sig_figs=sig_figs)
-    return f"{stat_axis}={format_float(var_ax_data[stat_axis][min_idx], sig_figs)}{min_pt}"
-
-def _mean_sf(var_ax_data, stat_axis=None, sig_figs=None, **kwargs):
-    return f"{stat_axis}={format_float(np.nanmean(var_ax_data[stat_axis]), sig_figs)}"
-
-def _median_sf(var_ax_data, stat_axis=None, sig_figs=None, **kwargs):
-    return f"{stat_axis}={format_float(np.nanmedian(var_ax_data[stat_axis]), sig_figs)}"
-
-def _std_sf(var_ax_data, stat_axis=None, sig_figs=None, **kwargs):
-    return f"{stat_axis}={format_float(np.nanstd(var_ax_data[stat_axis]), sig_figs)}"
-
-def _diff_sf(var_ax_data, stat_axis=None, sig_figs=None, **kwargs):
-    return f"{stat_axis}={format_float(var_ax_data[stat_axis][-1] - var_ax_data[stat_axis][0], sig_figs)}"
-
-def _num_slope_changes_sf(var_ax_data=None, stat_axis=None, **kwargs):
-    num_slope_changes = np.count_nonzero(np.diff(np.sign(np.diff(var_ax_data[stat_axis]))))
-    if num_slope_changes > 0:
-        return f"data on the {stat_axis}-axis change from increasing to decreasing or vice versa {num_slope_changes} times"
-    return ""
-
-def _max_inc_sf(var_ax_data, ax_name_to_ticklabels=None, stat_axis=None, var_idx=None, sig_figs=None, **kwargs):
-    arr_diff = np.diff(var_ax_data[stat_axis])
-    max_inc_idx = np.argmax(arr_diff)
-    max_inc_pt1 = idx_pt_desc(max_inc_idx, ax_name_to_ticklabels, stat_axis, var_idx=var_idx, sig_figs=sig_figs).replace("at ", "")
-    max_inc_pt2 = idx_pt_desc(max_inc_idx + 1, ax_name_to_ticklabels, stat_axis, var_idx=var_idx, sig_figs=sig_figs).replace("at ", "")
-    return f"a max increase of {stat_axis}={format_float(arr_diff[max_inc_idx], sig_figs)} from {max_inc_pt1} to {max_inc_pt2}"
-
-def _max_dec_sf(var_ax_data, ax_name_to_ticklabels=None, stat_axis=None, var_idx=None, sig_figs=None, **kwargs):
-    arr_diff = np.diff(var_ax_data[stat_axis])
-    max_dec_idx = np.argmin(arr_diff)
-    max_dec_pt1 = idx_pt_desc(max_dec_idx, ax_name_to_ticklabels, stat_axis, var_idx=var_idx, sig_figs=sig_figs).replace("at ", "")
-    max_dec_pt2 = idx_pt_desc(max_dec_idx + 1, ax_name_to_ticklabels, stat_axis, var_idx=var_idx, sig_figs=sig_figs).replace("at ", "")
-    return f"a max decrease of {stat_axis}={format_float(arr_diff[max_dec_idx], sig_figs)} from {max_dec_pt1} to {max_dec_pt2}"
-
-
-STAT_NAME_TO_FUNC = {
-    "max": _max_sf,
-    "min": _min_sf,
-    "mean": _mean_sf,
-    "median": _median_sf,
-    "std": _std_sf,
-    "diff": _diff_sf,
-    "num_slope_changes": _num_slope_changes_sf,
-    "maxinc": _max_inc_sf,
-    "maxdec": _max_dec_sf,
-}
-
-
-STAT_NAME_TO_DESC_INTRO = {
-    "max": "a maximum value of",
-    "min": "a minimum value of",
-    "mean": "an average of",
-    "median": "a median of",
-    "std": "a standard deviation of",
-    "diff": "a difference from start to end of",
-}

@@ -1,6 +1,8 @@
 The alttextify command
 ======================
 
+**NOTE**: Calling ``alttextify`` on a notebook will execute each of its cells, which can contain malicious code. Please only use ``alttextify`` on trusted notebooks!
+
 | matplotalt includes the ``alttextify`` command to automatically add alt text to each figure in a notebook. For example,
 |    ``alttextify ./examples_no_alt.ipynb examples_with_alt -s html img_file``
 | will run :func:`matplotalt.show_with_alt` on each cell with a matplotlib figure output and save the notebook with alt texts to ``examples_with_alt.ipynb``

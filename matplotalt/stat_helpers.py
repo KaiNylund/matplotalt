@@ -53,7 +53,7 @@ def _max_dec_sf(var_ax_data, ax_name_to_ticklabels=None, stat_axis=None, var_idx
     return f"a max decrease of {stat_axis}={format_float(arr_diff[max_dec_idx], sig_figs)} from {max_dec_pt1} to {max_dec_pt2}"
 
 
-STAT_NAME_TO_FUNC = {
+BASE_STAT_NAME_TO_FUNC = {
     "max": _max_sf,
     "min": _min_sf,
     "mean": _mean_sf,
@@ -66,7 +66,7 @@ STAT_NAME_TO_FUNC = {
 }
 
 
-STAT_NAME_TO_DESC_INTRO = {
+BASE_STAT_NAME_TO_DESC_INTRO = {
     "max": "a maximum value of",
     "min": "a minimum value of",
     "mean": "an average of",

@@ -155,7 +155,7 @@ class ChartDescription():
         return ""
 
 
-    def get_encodings_desc(self, encoded_obj_name="variables", max_color_desc_count=4):
+    def get_encodings_desc(self, encoded_obj_name="variables", max_color_desc_count=4, sig_figs=4):
         """
         Return a description of the color encodings for each variable in the figure of the form:
         '{variable_name} is plotted in {variable_color}'
@@ -241,7 +241,9 @@ class ChartDescription():
         if ax_share_a_type:
             num_axs_word = "both" if num_axes == 2 else "all"
             axes_desc += f", {num_axs_word} using {next(iter(self.ax_name_to_type.values()))} scales"
-        return axes_desc + "."
+        if axes_desc != "":
+            axes_desc += "."
+        return axes_desc
 
 
     def get_annotations_desc(self, include_coords=False, sig_figs=4):
@@ -363,12 +365,12 @@ class ChartDescription():
                         cur_stats_desc_arr.append(f"{len(outlier_pts)} {outlier_word} at {format_list(outlier_pts)}")
                 else:
                     cur_stats_desc_arr.append(f"{len(outlier_idxs)} {outlier_word}")
-            elif stat_name in STAT_NAME_TO_FUNC:
-                axs_stats = ", ".join([STAT_NAME_TO_FUNC[stat_name](var_ax_data,
+            elif stat_name in BASE_STAT_NAME_TO_FUNC:
+                axs_stats = ", ".join([BASE_STAT_NAME_TO_FUNC[stat_name](var_ax_data,
                                        ax_name_to_ticklabels=ax_name_to_ticklabels, stat_axis=ax,
                                        var_idx=var_idx, sig_figs=sig_figs) for ax in stat_axes])
-                if stat_name in STAT_NAME_TO_DESC_INTRO:
-                    cur_stats_desc_arr.append(f"{STAT_NAME_TO_DESC_INTRO[stat_name]} {axs_stats}".strip())
+                if stat_name in BASE_STAT_NAME_TO_DESC_INTRO:
+                    cur_stats_desc_arr.append(f"{BASE_STAT_NAME_TO_DESC_INTRO[stat_name]} {axs_stats}".strip())
                 else:
                     cur_stats_desc_arr.append(axs_stats)
             else:
@@ -376,9 +378,11 @@ class ChartDescription():
         return cur_stats_desc_arr
 
 
-    def get_stats_desc(self, stats=[], max_outliers_desc=4, stat_axis=None, encoded_obj_name="points", sig_figs=4):
+    def get_stats_desc(self, stats=[], max_var_stats=5, max_outliers_desc=4, stat_axis=None, encoded_obj_name="points", sig_figs=4):
         """
         Return a description of the provided statistics for each variable along the given axis.
+
+        max_var_stats: If there are more than max_var_stats variables, then no stats descriptions will be added.
 
         See :func:`~ChartDescription.get_data_stats_arr` for more details
 
@@ -409,7 +413,7 @@ class ChartDescription():
                 # If x, y,... are shape (n, d):
                 if isinstance(first_ax_data[0], (list, np.ndarray)):
                     # and we have labels:
-                    if self.labels:
+                    if self.labels and len(self.labels) > 0 and len(self.labels) < max_var_stats:
                         #if not (len(first_ax_data) == len(self.labels)):
                         #    warnings.warn("Number of variables in axis data does not match numbers of labels")
                         for i, l in enumerate(self.labels):
@@ -420,7 +424,7 @@ class ChartDescription():
                                                                     sig_figs=sig_figs)
                             stats_desc += f"{l.capitalize()} have {format_list(cur_stats_desc_arr)}. "
                     # and we don't have labels:
-                    elif len(first_ax_data) > 1:
+                    elif len(first_ax_data) > 1 and len(first_ax_data) < max_var_stats:
                         stats_desc += f"{len(first_ax_data)} variables are plotted. "
                         for i in range(len(first_ax_data)):
                             cur_stats_desc_arr = self.get_data_stats_arr(self.ax_name_to_data, cur_ax_ticklabels,
@@ -657,15 +661,15 @@ class ChartDescription():
         # Add axis and encoding descriptions
         if desc_level > 0:
             alt_text_arr.append(self.get_axes_desc(sig_figs=desc_config["sig_figs"]))
-            alt_text_arr.append(self.get_encodings_desc(max_color_desc_count=desc_config["max_color_desc_count"]))
+            alt_text_arr.append(self.get_encodings_desc(max_color_desc_count=desc_config["max_color_desc_count"], sig_figs=desc_config["sig_figs"]))
         alt_text_arr.append(self.get_annotations_desc(include_coords=desc_config["include_annotation_coords"], sig_figs=desc_config["sig_figs"]))
         # Add stats
         if desc_level > 1:
             # if stats is None, use the default stats from the child class
             if desc_config["stats"] and len(desc_config["stats"]) > 0:
-                alt_text_arr.append(self.get_stats_desc(stats=desc_config["stats"], max_outliers_desc=desc_config["max_outliers_desc"], sig_figs=desc_config["sig_figs"]).strip().capitalize())
+                alt_text_arr.append(self.get_stats_desc(stats=desc_config["stats"], max_var_stats=desc_config["max_var_stats"], max_outliers_desc=desc_config["max_outliers_desc"], sig_figs=desc_config["sig_figs"]).strip().capitalize())
             else:
-                alt_text_arr.append(self.get_stats_desc(max_outliers_desc=desc_config["max_outliers_desc"], sig_figs=desc_config["sig_figs"]))
+                alt_text_arr.append(self.get_stats_desc(max_var_stats=desc_config["max_var_stats"], max_outliers_desc=desc_config["max_outliers_desc"], sig_figs=desc_config["sig_figs"]))
         # Add trends if applicable
         if desc_level > 2:
             if desc_config["trends"] and len(desc_config["trends"]) > 0:
@@ -673,7 +677,7 @@ class ChartDescription():
             else:
                 alt_text_arr.append(self.get_trends_desc(sig_figs=desc_config["sig_figs"]))
 
-        alt_text_arr = [al.strip().capitalize() for al in alt_text_arr]
+        alt_text_arr = [al.strip().capitalize() for al in alt_text_arr if al]
         alt_text_arr = [al for al in alt_text_arr if al]
         alt_text = " ".join(alt_text_arr)
         alt_text.replace(r'\s+', r'\s')
@@ -913,6 +917,9 @@ class LineDescription(ChartDescription):
                 else:
                     self.x.append(line._xy[:, 0])
                     self.y.append(line._xy[:, 1])
+        # Remove duplicate vertical / horizontal lines
+        self.vline_xs = np.unique(self.vline_xs)
+        self.hline_ys = np.unique(self.hline_ys)
         # Unless all lines are horizontal / vertical,
         # remove lines that are constant on one axis so they aren't included in stats
         if len(constant_line_idxs) < len(self.lines):
@@ -924,7 +931,7 @@ class LineDescription(ChartDescription):
             self.ax_name_to_data["y"] = self.y
 
 
-    def get_encodings_desc(self, max_color_desc_count=4, **kwargs):
+    def get_encodings_desc(self, max_color_desc_count=4, sig_figs=4, **kwargs):
         """
         See :func:`~ChartDescription.get_stats_desc`. Additionally includes
         descriptions of any vertical and horizontal lines in the form:
@@ -937,11 +944,11 @@ class LineDescription(ChartDescription):
         if len(self.vline_xs) == 1:
             encodings_desc += f" There is a vertical line at x={self.vline_xs[0]}. "
         elif len(self.vline_xs) > 1:
-            encodings_desc += f" There are vertical lines at x={self.vline_xs}. "
+            encodings_desc += f" There are vertical lines at x={format_float_list(self.vline_xs, sig_figs=sig_figs)}. "
         if len(self.hline_ys) == 1:
             encodings_desc += f" There is a horizontal line at y={self.hline_ys[0]}. "
         elif len(self.hline_ys) > 1:
-            encodings_desc += f" There are horizontal lines at y={self.hline_ys}. "
+            encodings_desc += f" There are horizontal lines at y={format_float_list(self.hline_ys, sig_figs=sig_figs)}. "
         return encodings_desc
 
 
@@ -1005,7 +1012,7 @@ class AreaDescription(ChartDescription):
             self.ax_name_to_data["y"] = self.y
 
 
-    def get_encodings_desc(self, max_color_desc_count=4, **kwargs):
+    def get_encodings_desc(self, max_color_desc_count=4, sig_figs=4, **kwargs):
         """
         See :func:`~ChartDescription.get_stats_desc`. Additionally includes
         descriptions of any vertical and horizontal lines in the form:
@@ -1018,11 +1025,11 @@ class AreaDescription(ChartDescription):
         if len(self.vline_xs) == 1:
             encodings_desc += f" There is a vertical line at x={self.vline_xs[0]}. "
         elif len(self.vline_xs) > 1:
-            encodings_desc += f" There are vertical lines at x={self.vline_xs}. "
+            encodings_desc += f" There are vertical lines at x={format_float_list(self.vline_xs, sig_figs=sig_figs)}. "
         if len(self.hline_ys) == 1:
             encodings_desc += f" There is a horizontal line at y={self.hline_ys[0]}. "
         elif len(self.hline_ys) > 1:
-            encodings_desc += f" There are horizontal lines at y={self.hline_ys}. "
+            encodings_desc += f" There are horizontal lines at y={format_float_list(self.hline_ys, sig_figs=sig_figs)}. "
         return encodings_desc
 
 
@@ -1261,7 +1268,7 @@ class BoxplotDescription(ChartDescription):
 
 
 
-    def get_stats_desc(self, stats=["median", "iqr", "outliers"], max_outliers_desc=4, sig_figs=4):
+    def get_stats_desc(self, stats=["median", "iqr", "outliers"], max_outliers_desc=4, sig_figs=4, **kwargs):
         """
         Return a description of the provided statistics for each box.
 

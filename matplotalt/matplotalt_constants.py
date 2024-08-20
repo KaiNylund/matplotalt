@@ -14,8 +14,8 @@ DEFAULT_DESC_CONFIG = {
     "trends": [],
     "sig_figs": 4,
     "max_color_desc_count": 5,
+    "max_var_stats": 5,
     "max_outliers_desc": 3,
-    #"max_line_width": 80,
     "include_annotation_coords": False,
     "include_warnings": False
 }
@@ -23,7 +23,6 @@ DEFAULT_DESC_CONFIG = {
 CHART_TYPE_TO_DESC = {
     "other":       "An unknown chart type",
     "line":        "A line plot",
-    "area":        "An area chart",
     "scatter":     "A scatter plot",
     "bar":         "A bar chart",
     "image":       "An image",
@@ -34,7 +33,8 @@ CHART_TYPE_TO_DESC = {
     "pie":         "A pie chart",
     "strip":       "A strip plot",
     "choropleth":  "A choropleth map",
-    "contour":     "A contour plot"
+    "contour":     "A contour plot",
+    "area":        "An area chart",
 }
 
 CHART_TYPE_TO_ID = {

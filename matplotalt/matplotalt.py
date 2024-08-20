@@ -19,14 +19,14 @@ CHART_TYPE_TO_CLASS = {
     "line":    LineDescription,
     "bar":     BarDescription,
     "scatter": ScatterDescription,
-    "area":    AreaDescription,
     "image":   ImageDescription,
     "heatmap": HeatmapDescription,
     "boxplot": BoxplotDescription,
     "pie":     PieDescription,
     "radial":  LineDescription,
     "strip":   StripDescription,
-    "contour": ContourDescription
+    "contour": ContourDescription,
+    "area":    AreaDescription,
 }
 
 
@@ -189,7 +189,7 @@ def surface_alt_text(alt_text, methods=["html"], output_file=None):
 
 # TODO: Add option to output alt text as a latex command
 def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_type_classifier="auto",
-                      include_warnings=False, include_table=False, max_table_rows=20, **kwargs):
+                      max_subplots=9, include_warnings=False, include_table=False, max_table_rows=20, **kwargs):
     """
     Args:
         axs (matplotlib.axis.Axis|List[matplotlib.axis.Axis], optional):
@@ -220,6 +220,9 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
             * "model": Use a finetuned vision model to classify the chart type
 
             Defaults to "auto".
+        max_subplots (int, optional):
+            If there are more than max_subplots subplots, only the number of plots and suptitle
+            will be included in alt text.
         include_table (bool, optional):
             Whether to include a markdown table with the chart's data in the generated alt text.
             Defaults to False.
@@ -255,12 +258,15 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
         chart_title = fig.get_suptitle()
         if chart_title is not None:
             chart_title = " ".join(chart_title.replace("\n", " ").strip().split())
-        alt_text += f"A group of {len(flattened_axs)} subplots"
+        alt_text += f"A figure with {len(flattened_axs)} subplots."
         if chart_title != None and chart_title != "":
-            alt_text += f" titled \'{chart_title}\'."
+            alt_text += f" titled \'{chart_title}\'."\
+        # If there are more than max_subplots subplots, only return the suptitle + number
+        if len(flattened_axs) > max_subplots:
+            return alt_text
         alt_text += "\n\n"
         for ax_idx, ax in enumerate(flattened_axs):
-            alt_text += f" Subplot {ax_idx}: "
+            alt_text += f" Subplot {ax_idx + 1}: "
             chart_desc_class = get_cur_chart_desc_class(ax=ax, chart_type=chart_type, chart_type_classifier=chart_type_classifier, include_warnings=include_warnings)
             alt_text += chart_desc_class.get_chart_desc(desc_level=desc_level, **kwargs)
             if include_table:
@@ -289,8 +295,8 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
 # TODO: Add "block" param so people can pass that in if they had it in plt.show() before
 # TODO: Is there a way to alias plt.show to this function (e.g. plt.show() = show_with_alt())?
 def show_with_alt(alt_text=None, axs=None, fig=None, methods=["html"], chart_type=None,
-                  desc_level=2, context="", output_file=None, return_alt=False,
-                  **kwargs):
+                  desc_level=2, context="", output_file=None,
+                  return_alt=False, **kwargs):
     """
     Generates and surfaces starter alt text describing the given figure and axis.
 
@@ -536,9 +542,8 @@ def show_with_api_alt(api_key=None, prompt=None,
                       fig=None, desc_level=4, chart_type=None,
                       model="gpt-4-vision-preview", use_azure=False,
                       use_starter_alt_in_prompt=True, methods=["html"],
-                      max_tokens=225, context="",
-                      output_file=None, return_alt=False,
-                      **kwargs):
+                      max_tokens=225, context="", output_file=None,
+                      return_alt=False, **kwargs):
     """
     Return and surface AI generated alt text for the current matplotlib figure.
 

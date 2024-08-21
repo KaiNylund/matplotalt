@@ -530,7 +530,7 @@ class ChartDescription():
 
             if trend_name == "correlation":
                 if num_vars == 2:
-                    cur_trends_desc_arr.append(f"{var_labels[0]} and {var_labels[1]} have a correlation of {format_float(pearsonr(axis_var_data[0], axis_var_data[1]).statistic, sig_figs)}.")
+                    cur_trends_desc_arr.append(f"{var_labels[0]} and {var_labels[1]} have a correlation of {format_float(pearsonr(axis_var_data[0], axis_var_data[1]).statistic, sig_figs)}")
                 else:
                     max_corr = -2
                     min_corr = 2
@@ -545,7 +545,7 @@ class ChartDescription():
                             if cur_vars_corr > max_corr:
                                 min_corr = cur_vars_corr
                                 max_corr_vars = (var_labels[i], var_labels[j])
-                    cur_trends_desc_arr.append(f"{max_corr_vars[0]} and {max_corr_vars[1]} have the highest correlation (r={format_float(max_corr, sig_figs)}), while {min_corr_vars[0]} and {min_corr_vars[1]} have the lowest (r={format_float(min_corr, sig_figs)}).")
+                    cur_trends_desc_arr.append(f"{max_corr_vars[0]} and {max_corr_vars[1]} have the highest correlation (r={format_float(max_corr, sig_figs)}), while {min_corr_vars[0]} and {min_corr_vars[1]} have the lowest (r={format_float(min_corr, sig_figs)})")
         return cur_trends_desc_arr
 
 
@@ -620,7 +620,7 @@ class ChartDescription():
                                                                                var_label=var_label,
                                                                                trends=trends,
                                                                                sig_figs=sig_figs))
-                trends_desc = " ".join(cur_trends_desc_arr)
+                trends_desc = ". ".join(cur_trends_desc_arr) + "."
         return trends_desc.strip()
 
 
@@ -1010,6 +1010,9 @@ class AreaDescription(ChartDescription):
             self.ax_name_to_data["x"] = self.x
         if len(self.y) > 0:
             self.ax_name_to_data["y"] = self.y
+        # Remove duplicate vertical / horizontal lines
+        self.vline_xs = np.unique(self.vline_xs)
+        self.hline_ys = np.unique(self.hline_ys)
 
 
     def get_encodings_desc(self, max_color_desc_count=4, sig_figs=4, **kwargs):
@@ -1483,6 +1486,8 @@ class ContourDescription(ChartDescription):
             raise ValueError("Unable to parse contour lines from chart")
         self.level_values = self.contour_set.labelCValues
         self.level_labels = self.contour_set.labelTexts
+        if self.level_values is None or len(self.level_values) < 1:
+            raise ValueError("Contour plot is missing contour values")
         self.level_centers = []
         for path in self.contour_set._paths[1:-1]:
             self.level_centers.append(np.mean(path._vertices, axis=0))

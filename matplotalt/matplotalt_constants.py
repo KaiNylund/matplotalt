@@ -15,6 +15,7 @@ DEFAULT_DESC_CONFIG = {
     "sig_figs": 4,
     "max_color_desc_count": 5,
     "max_var_stats": 5,
+    "max_var_trends": 5,
     "max_outliers_desc": 3,
     "include_annotation_coords": False,
     "include_warnings": False

@@ -93,82 +93,6 @@ def infer_model_chart_type(ax=None, model="KaiNylund/chart-classifier-tiny"):
         return predicted_label
 
 
-def get_arr_shape(arr, arr_ticklabels, var_label="data", generally_thresh=0.65, strictly_thresh=1.0, sig_figs=4):
-    shape_desc = ""
-    num_pts = len(arr)
-    if num_pts < 3:
-        return shape_desc
-    arr_diff = np.diff(arr)
-    max_idx = np.argmax(arr)
-    min_idx = np.argmin(arr)
-    pct_flat = (arr_diff == 0).sum() / (num_pts - 1)
-    if max_idx > 1:
-        pct_inc_up_to_max = (arr_diff[:(max_idx - 1)] > 0).sum() / (max_idx - 1)
-        pct_flat_up_to_max = (arr_diff[:(max_idx - 1)] == 0).sum() / (max_idx - 1)
-    else:
-        pct_inc_up_to_max = 0
-        pct_flat_up_to_max = 0
-    if min_idx > 1:
-        pct_dec_up_to_min = (arr_diff[:(min_idx - 1)] < 0).sum() / (min_idx - 1)
-        pct_flat_up_to_min = (arr_diff[:(min_idx - 1)] == 0).sum() / (min_idx - 1)
-    else:
-        pct_dec_up_to_min = 0
-        pct_flat_up_to_min = 0
-
-    inc_dec_modifier1 = "generally"
-    inc_dec_modifier2 = "generally"
-    inc_dec_desc1 = ""
-    inc_dec_desc2 = ""
-    # Data is constant
-    if pct_flat >= 1.0:
-        shape_desc = f"{var_label} are constant."
-    else:
-        # Decreasing up to the min
-        if pct_dec_up_to_min >= generally_thresh:
-            inc_dec_desc1 = f"decrease to a min of {format_float(arr_ticklabels[min_idx], sig_figs)}"
-            if (pct_dec_up_to_min + pct_flat_up_to_min) >= strictly_thresh:
-                inc_dec_modifier1 = "strictly"
-            if pct_flat_up_to_min > 0:
-                inc_dec_modifier1 = "are constant or " + inc_dec_modifier1
-        # Increasing up to the max
-        elif pct_inc_up_to_max >= generally_thresh:
-            inc_dec_desc1 = f"increase to a max of {format_float(arr_ticklabels[max_idx], sig_figs)}"
-            if (pct_inc_up_to_max + pct_flat_up_to_max) >= strictly_thresh:
-                inc_dec_modifier1 = "strictly"
-            if pct_flat_up_to_max > 0:
-                inc_dec_modifier1 = "are constant or " + inc_dec_modifier1
-        # If there's a clear inc/dec trend up to the min/max
-        if inc_dec_desc1 != "":
-            shape_desc += f"{var_label} {inc_dec_modifier1} {inc_dec_desc1}"
-            # Decreasing after the max
-            if max_idx != num_pts - 1:
-                pct_dec_past_max = (arr_diff[(max_idx - 1):] < 0).sum() / (num_pts - max_idx - 1)
-                pct_flat_past_max = (arr_diff[(max_idx - 1):] == 0).sum() / (num_pts - max_idx - 1)
-                if pct_dec_past_max >= generally_thresh:
-                    inc_dec_desc2 = "decrease"
-                    if (pct_dec_past_max + pct_flat_past_max) >= strictly_thresh:
-                        inc_dec_modifier2 = "strictly"
-                    if pct_flat_past_max > 0:
-                        inc_dec_modifier2 = "are constant or " + inc_dec_modifier2
-            # Increasing after the min
-            elif min_idx != num_pts - 1:
-                pct_inc_past_min = (arr_diff[(min_idx - 1):] > 0).sum() / (num_pts - min_idx - 1)
-                pct_flat_past_min = (arr_diff[(min_idx - 1):] == 0).sum() / (num_pts - min_idx - 1)
-                if pct_inc_past_min >= generally_thresh:
-                    inc_dec_desc2 = "increase"
-                    if (pct_inc_past_min + pct_flat_past_min) >= strictly_thresh:
-                        inc_dec_modifier2 = "strictly"
-                    if pct_flat_past_min > 0:
-                        inc_dec_modifier2 = "are constant or " + inc_dec_modifier2
-        if inc_dec_desc2 != "":
-            shape_desc += f", then {inc_dec_modifier2} {inc_dec_desc2}."
-    #  No clear trends so just describe the pct. increasing, decreasing, and constant
-    #if shape_desc == "":
-    #    pct_increasing = (arr_diff > 0).sum() / (num_pts - 1)
-    #    pct_decreasing = (arr_diff < 0).sum() / (num_pts - 1)
-    #    shape_desc += f"{var_label} are increasing {format_float(100 * pct_increasing, sig_figs)}% of the time, decreasing {format_float(100 * pct_decreasing, sig_figs)}% of the time, and constant {format_float(100 * pct_flat, sig_figs)}% of the time."
-    return shape_desc.strip()
-
 
 # Nice one-liner from john1024 at https://stackoverflow.com/questions/29643352
 def hex_to_rgb(h):
@@ -208,7 +132,8 @@ def get_color_name(color_input):
 
 def is_number(s):
     """ Returns True if string is a number. """
-    s = s.replace("−", "-")
+    if isinstance(s, str):
+        s = s.replace("−", "-")
     try:
         float(s)
         return True
@@ -240,14 +165,16 @@ def format_float(f, sig_figs=4, tol=1e-10):
     return f
 
 
-def get_ax_ticks_type(ax_ticks, r_thresh=0.97):
+def get_ax_ticks_scale(ax_ticks, r_thresh=0.97):
     formatted_ticks = []
     tick_types = []
     # Get type of each axis tick individually
     for i in ax_ticks:
+        if isinstance(i, str):
+            i = i.replace("−", "-")
         if is_number(i):
             tick_types.append("number")
-            formatted_ticks.append(float(i.replace("−", "-")))
+            formatted_ticks.append(float(i))
         elif is_date(i):
             tick_types.append("date")
         else:
@@ -324,66 +251,6 @@ def format_float_list(l, sig_figs):
     return format_list(str_l)
 
 
-def get_quartile_outlier_idxs(arr):
-    """
-    Given an array of floats, returns the indices of outliers defined as observations
-    that fall below Q1 − 1.5 IQR or above Q3 + 1.5 IQR.
-    """
-    Q1 = np.quantile(arr, 0.25)
-    Q3 = np.quantile(arr, 0.75)
-    IQR = Q3 - Q1
-    lower = Q1 - 1.5 * IQR
-    upper = Q3 + 1.5 * IQR
-    outlier_idxs = np.squeeze(np.argwhere((arr > upper) | (arr < lower)))
-    if outlier_idxs.ndim == 0:
-        outlier_idxs = [outlier_idxs]
-    if len(outlier_idxs) > 0:
-        return np.sort(outlier_idxs)
-    return []
-
-
-# xyz: tuple of coords in format (x, y, z, ...)
-def get_outliers_desc(xyz, outlier_idxs, outlier_axis=None, max_outliers_desc=4, sig_figs=4):
-    if outlier_axis:
-        axis_desc = f"along the {outlier_axis}-axis"
-    else:
-        axis_desc = ""
-    outlier_word = "outlier" if len(outlier_idxs) == 1 else "outliers"
-    if len(outlier_idxs) == 0:
-        return "no outliers"
-    elif len(outlier_idxs) < max_outliers_desc:
-        if np.array(xyz).ndim == 1:
-            outlier_pts = [format_float(xyz[i], sig_figs) for i in outlier_idxs]
-            return f"{len(outlier_pts)} {outlier_word} {axis_desc} at {outlier_axis}={format_list(outlier_pts)}"
-        else:
-            outlier_pts = [f"({', '.join([format_float(pt[i], sig_figs) for pt in xyz])})" \
-                            for i in outlier_idxs]
-            return f"{len(outlier_pts)} {outlier_word} {axis_desc} at {format_list(outlier_pts)}"
-    else:
-        return f"{len(outlier_idxs)} {outlier_word} {axis_desc}"
-
-
-def idx_pt_desc(idx, ax_name_to_ticklabels, cur_stat_axis, var_idx=None, sig_figs=4):
-    if len(ax_name_to_ticklabels) > 0:
-        ax_names = list(ax_name_to_ticklabels.keys())
-        if var_idx is not None:
-            ax_to_pt_label = OrderedDict([(an, ax_name_to_ticklabels[an][var_idx][idx]) for an in ax_names if an != cur_stat_axis])
-        else:
-            ax_to_pt_label = OrderedDict([(an, ax_name_to_ticklabels[an][idx]) for an in ax_names if an != cur_stat_axis])
-        pt_values = list(ax_to_pt_label.values())
-        if len(pt_values) >= 2:
-            return f" at ({', '.join([str(format_float(ptv, sig_figs)) for ptv in pt_values])})"
-        elif len(pt_values) == 1:
-            return f" at {list(ax_to_pt_label.keys())[0]}={format_float(pt_values[0], sig_figs)}"
-        else:
-            if var_idx is not None:
-                idx_val = ax_name_to_ticklabels[ax_names[0]][var_idx][idx]
-            else:
-                idx_val = ax_name_to_ticklabels[ax_names[0]][idx]
-            if not is_number(idx_val):
-                return f" ({idx_val})"
-    else:
-        return ""
 
 # headers_to_data: dict of headers to x/y/z/ticklabels list
 # columns must all have the same length
@@ -405,3 +272,38 @@ def create_md_table(headers_to_data, sig_figs=4):
 
 def url_safe(s):
     return re.sub("[^a-z0-9-_]", "", s.lower().replace(" ", "_"))
+
+
+def idx_pt_desc(idxs, chart_dict, var_name, excluded_axis, sig_figs=4):
+    ax_info = chart_dict["ax_info"]
+    if len(ax_info) > 0:
+        if not isinstance(idxs, (list, np.ndarray)):
+            idxs = [idxs]
+        idxs_desc_arr = []
+        var_data = chart_dict["var_info"][var_name]["data"]
+        ax_names = list(var_data.keys())
+        for i, idx in enumerate(idxs):
+            ax_name_to_idx_labels = {}
+            for ax_name, ax_dict in ax_info.items():
+                if ax_name != excluded_axis or len(ax_names) == 1:
+                    if "ticklabels" in ax_dict and idx < len(ax_dict["ticklabels"]):
+                        ax_name_to_idx_labels[ax_name] = ax_dict["ticklabels"][idx]
+                    elif ax_name in var_data and idx < len(var_data[ax_name]):
+                        ax_name_to_idx_labels[ax_name] = var_data[ax_name][idx]
+            idx_labels = list(ax_name_to_idx_labels.values())
+            if len(idx_labels) >= 2:
+                idxs_desc_arr.append(f"({', '.join([str(format_float(ptv, sig_figs)) for ptv in idx_labels])})")
+            elif len(idx_labels) == 1 and i == 0:
+                idxs_desc_arr.append(f"{list(ax_name_to_idx_labels.keys())[0]}={format_float(idx_labels[0], sig_figs)}")
+            elif len(idx_labels) == 1:
+                idxs_desc_arr.append(format_float(idx_labels[0], sig_figs))
+            else:
+                ax_dict = ax_info[ax_names[0]]
+                if "ticklabels" in ax_dict and idx < len(ax_dict["ticklabels"]):
+                    idx_val = ax_dict["ticklabels"][idx]
+                else:
+                    idx_val = var_data[ax_names[0]][idx]
+                if not is_number(idx_val):
+                    idxs_desc_arr.append(f"({idx_val})")
+        return format_list(idxs_desc_arr)
+    return ""

@@ -233,10 +233,13 @@ def assert_equal_shapes(arrays):
 
 def format_list(l):
     """Returns the given list as 'a, b, c, ..., and d'"""
-    str_l = [str(i) for i in l]
-    if len(str_l) > 1:
+    str_l = [str(i) for i in l if str(i) != ""]
+    num_el = len(str_l)
+    if num_el > 2:
         return ", ".join(str_l[:-1]) + ", and " + str_l[-1]
-    elif len(str_l) == 1:
+    elif num_el == 2:
+        return f"{str_l[0]} and {str_l[1]}"
+    elif num_el == 1:
         return str_l[0]
     else:
         return ""

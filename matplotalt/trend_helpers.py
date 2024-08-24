@@ -34,7 +34,7 @@ def _shape_tf(chart_dict, var_name, ax_name, generally_thresh=0.65, strictly_thr
     inc_dec_desc2 = ""
     # Data is constant
     if pct_flat >= 1.0:
-        shape_desc = f"{var_name} are constant"
+        shape_desc = f"{var_name} is constant"
     else:
         # Decreasing up to the min
         if pct_dec_up_to_min >= generally_thresh:
@@ -42,14 +42,14 @@ def _shape_tf(chart_dict, var_name, ax_name, generally_thresh=0.65, strictly_thr
             if (pct_dec_up_to_min + pct_flat_up_to_min) >= strictly_thresh:
                 inc_dec_modifier1 = "strictly"
             if pct_flat_up_to_min > 0:
-                inc_dec_modifier1 = "are constant or " + inc_dec_modifier1
+                inc_dec_modifier1 = "is constant or " + inc_dec_modifier1
         # Increasing up to the max
         elif pct_inc_up_to_max >= generally_thresh:
             inc_dec_desc1 = f"increase to a max at {idx_pt_desc(max_idx, chart_dict, var_name, ax_name, sig_figs=sig_figs)}"
             if (pct_inc_up_to_max + pct_flat_up_to_max) >= strictly_thresh:
                 inc_dec_modifier1 = "strictly"
             if pct_flat_up_to_max > 0:
-                inc_dec_modifier1 = "are constant or " + inc_dec_modifier1
+                inc_dec_modifier1 = "is constant or " + inc_dec_modifier1
         # If there's a clear inc/dec trend up to the min/max
         if inc_dec_desc1 != "":
             shape_desc += f"{var_name} {inc_dec_modifier1} {inc_dec_desc1}"
@@ -62,7 +62,7 @@ def _shape_tf(chart_dict, var_name, ax_name, generally_thresh=0.65, strictly_thr
                     if (pct_dec_past_max + pct_flat_past_max) >= strictly_thresh:
                         inc_dec_modifier2 = "strictly"
                     if pct_flat_past_max > 0:
-                        inc_dec_modifier2 = "are constant or " + inc_dec_modifier2
+                        inc_dec_modifier2 = "is constant or " + inc_dec_modifier2
             # Increasing after the min
             elif min_idx != num_pts - 1:
                 pct_inc_past_min = (arr_diff[(min_idx - 1):] > 0).sum() / (num_pts - min_idx - 1)
@@ -72,14 +72,14 @@ def _shape_tf(chart_dict, var_name, ax_name, generally_thresh=0.65, strictly_thr
                     if (pct_inc_past_min + pct_flat_past_min) >= strictly_thresh:
                         inc_dec_modifier2 = "strictly"
                     if pct_flat_past_min > 0:
-                        inc_dec_modifier2 = "are constant or " + inc_dec_modifier2
+                        inc_dec_modifier2 = "is constant or " + inc_dec_modifier2
         if inc_dec_desc2 != "":
             shape_desc += f", then {inc_dec_modifier2} {inc_dec_desc2}"
     #  No clear trends so just describe the pct. increasing, decreasing, and constant
     #if shape_desc == "":
     #    pct_increasing = (arr_diff > 0).sum() / (num_pts - 1)
     #    pct_decreasing = (arr_diff < 0).sum() / (num_pts - 1)
-    #    shape_desc += f"{var_label} are increasing {format_float(100 * pct_increasing, sig_figs)}% of the time, decreasing {format_float(100 * pct_decreasing, sig_figs)}% of the time, and constant {format_float(100 * pct_flat, sig_figs)}% of the time."
+    #    shape_desc += f"{var_label} is increasing {format_float(100 * pct_increasing, sig_figs)}% of the time, decreasing {format_float(100 * pct_decreasing, sig_figs)}% of the time, and constant {format_float(100 * pct_flat, sig_figs)}% of the time."
     return shape_desc.strip()
 
 

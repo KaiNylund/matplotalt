@@ -126,7 +126,7 @@ class ChartDescription():
                 cur_var_name = var_names[i]
             # Otherwise use "variable {i}" or the ylabel or "the data"
             elif num_data_objects > 1:
-                cur_var_name = f"{mark_type} {i + 1}"
+                cur_var_name = f"{self.chart_dict['chart_type']} {i + 1}"
             # add var axis data to chart_dict
             if cur_var_name not in self.chart_dict["var_info"]:
                 self.chart_dict["var_info"][cur_var_name] = {}
@@ -362,7 +362,7 @@ class ChartDescription():
                     var_stats_desc_arr.append(axs_stats)
                 else:
                     raise ValueError(f"Statistic {stat_name} is not supported for the current chart type")
-            stats_desc += f"{var_name.capitalize()} have {format_list(var_stats_desc_arr)}. "
+            stats_desc += f"{var_name.capitalize()} has {format_list(var_stats_desc_arr)}. "
         return stats_desc.strip()
 
 
@@ -399,6 +399,7 @@ class ChartDescription():
                                                                              sig_figs=sig_figs) for ax_name in trend_axes])
                 else:
                     raise ValueError(f"Trend {trend_name} is not supported for the current chart type")
+        var_trends_desc_arr = [vt for vt in var_trends_desc_arr if vt != ""]
         trends_desc += ". ".join(var_trends_desc_arr)
         if trends_desc != "":
             trends_desc += "."
@@ -437,7 +438,7 @@ class ChartDescription():
         """
         desc_config = deepcopy(DEFAULT_DESC_CONFIG)
         desc_config.update(kwargs)
-        print(self.chart_dict)
+        #print(self.chart_dict)
         alt_text_arr = []
         alt_text_arr.append(self.get_chart_type_desc())
         # Add axis and encoding descriptions
@@ -466,6 +467,9 @@ class ChartDescription():
         #alt_text = insert_line_breaks(alt_text, max_line_width=desc_config["max_line_width"])
         return alt_text
 
+
+    def get_chart_dict(self):
+        return deepcopy(self.chart_dict)
 
 
 ##################################################################################################
@@ -523,7 +527,7 @@ class AreaDescription(ChartDescription):
             for i in constant_line_idxs:
                 del self.lines[i]
         # populate data in chart_dict for each variable
-        self.parse_data({"x": x, "y": y}, mark_type="area")
+        self.parse_data({"x": x, "y": y}, mark_type="point")
 
 
 
@@ -596,7 +600,7 @@ class BarDescription(ChartDescription):
         if self.chart_dict["ax_info"]["y"]["scale"] in ["categorical", "datetime"]:
             self.cat_axis = "y"
             self.num_axis = "x"
-        self.parse_data({self.cat_axis: bar_ticks, self.num_axis: bar_values}, mark_type="bar")
+        self.parse_data({self.cat_axis: bar_ticks, self.num_axis: bar_values}, mark_type="point")
 
 
     def get_encodings_desc(self, **kwargs):
@@ -724,7 +728,7 @@ class BoxplotDescription(ChartDescription):
         #if (len(self.label_to_encoding) == 0) and self.labels and (len(self.labels) > 0) and self.legend_handles:
         #    for i, label in enumerate(self.labels):
         #        self.label_to_encoding[label] = get_color_name(self.legend_handles[i]._facecolors[0])
-        return super().get_encodings_desc(mark_type="boxplot", **kwargs)
+        return super().get_encodings_desc(mark_type="box", **kwargs)
 
 
 
@@ -803,7 +807,7 @@ class ContourDescription(ChartDescription):
         self.level_centers = []
         for path in self.contour_set._paths[1:-1]:
             self.level_centers.append(np.mean(path._vertices, axis=0))
-        self.parse_data({"x": [], "y": []}, mark_type="contour")
+        self.parse_data({"x": [], "y": []}, mark_type="line")
 
 
     def get_data_as_md_table(self, **kwargs):
@@ -895,7 +899,7 @@ class HeatmapDescription(ChartDescription):
             if len(self.chart_dict["ax_info"]["z"]["ticklabels"]) > 0:
                 self.chart_dict["ax_info"]["z"]["scale"] = get_ax_ticks_scale(self.chart_dict["ax_info"]["z"]["ticklabels"])
         # add data to chart_dict
-        self.parse_data({"x": [x], "y": [y], "z": [z]}, mark_type="heatmap")
+        self.parse_data({"x": [x], "y": [y], "z": [z]}, mark_type="cell")
 
 
     def get_chart_type_desc(self):
@@ -966,7 +970,7 @@ class ImageDescription(ChartDescription):
             if len(self.chart_dict["ax_info"]["z"]["ticklabels"]) > 0:
                 self.chart_dict["ax_info"]["z"]["scale"] = get_ax_ticks_scale(self.chart_dict["ax_info"]["z"]["ticklabels"])
         # add data to chart_dict
-        self.parse_data({"x": [x], "y": [y], "z": [z]}, mark_type="image")
+        self.parse_data({"x": [x], "y": [y], "z": [z]}, mark_type="pixel")
 
 
     def get_chart_type_desc(self):
@@ -1281,12 +1285,14 @@ class StripDescription(ChartDescription):
         """
         super().__init__(ax, fig, chart_type="strip", **kwargs)
         self.point_collections = self.ax.collections
-        self.num_axis = "x"
         x = [pc._offsets.data[:, 0] for pc in self.point_collections]
         y = [pc._offsets.data[:, 1] for pc in self.point_collections]
         if len(x) < 1 and len(y) < 1:
             raise ValueError("Strip plot contains no points")
-        self.parse_data({"x": x, "y": y}, mark_type="strip")
+        ax_to_data = {"x": x}
+        if self.num_axis == "y":
+            ax_to_data = {"y": y}
+        self.parse_data(ax_to_data, mark_type="point")
 
 
     def parse_encodings(self, var_labels=None):

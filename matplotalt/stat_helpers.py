@@ -1,5 +1,5 @@
 import numpy as np
-from matplotalt_helpers import format_float, format_list, idx_pt_desc
+from matplotalt_helpers import format_float, idx_pt_desc
 
 
 # each function should take: chart_dict, var_name, ax_name, sig_figs
@@ -105,7 +105,7 @@ def _outliers_sf(chart_dict, var_name, ax_name, max_outliers_desc, sig_figs):
         return "no outliers"
     elif len(outlier_idxs) < max_outliers_desc:
         outlier_pts = idx_pt_desc(outlier_idxs, chart_dict, var_name, ax_name, sig_figs=sig_figs)
-        return f"{len(outlier_pts)} {outlier_word} at {format_list(outlier_pts)}"
+        return f"{len(outlier_idxs)} {outlier_word} at {outlier_pts}"
     else:
         return f"{len(outlier_idxs)} {outlier_word}"
 

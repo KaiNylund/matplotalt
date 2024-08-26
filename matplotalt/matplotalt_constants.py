@@ -22,7 +22,7 @@ DEFAULT_DESC_CONFIG = {
 }
 
 CHART_TYPE_TO_DESC = {
-    "other":       "An unknown chart type",
+    "other":       "An chart of unknown type",
     "line":        "A line plot",
     "scatter":     "A scatter plot",
     "bar":         "A bar chart",

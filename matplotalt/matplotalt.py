@@ -27,6 +27,7 @@ CHART_TYPE_TO_CLASS = {
     "strip":   StripDescription,
     "contour": ContourDescription,
     "area":    AreaDescription,
+    "other":   ChartDescription,
 }
 
 
@@ -53,7 +54,7 @@ def infer_chart_type(ax=None):
         except Exception as e:
             continue
     warnings.filterwarnings("default", category=UserWarning)
-    return "other"
+    return "unknown"
 
 
 def get_cur_chart_desc_class(ax=None, chart_type=None, include_warnings=False,
@@ -94,14 +95,14 @@ def get_cur_chart_desc_class(ax=None, chart_type=None, include_warnings=False,
             chart_type = infer_model_chart_type(ax)
         else:
             raise ValueError(f"Unknown chart_type_classifier: {chart_type_classifier}; supported options are 'auto' and 'model'")
-        if chart_type == "other":
+        if chart_type == "unknown":
             raise ValueError("Unable to infer chart type, please pass a chart_type parameter to generate_alt_text")
     return CHART_TYPE_TO_CLASS[chart_type](ax)
 
 
 # TODO: Add markdown heading that says the output is alt text (take optional heading level parameter)
 #       'Alt text for {chart title}'
-def surface_alt_text(alt_text, methods=["html"], output_file=None):
+def add_alt_text(alt_text, methods=["html"], output_file=None):
     """
     Surfaces given alt text in a Jupyter notebook using the given methods.
 
@@ -187,6 +188,11 @@ def surface_alt_text(alt_text, methods=["html"], output_file=None):
     plt.show()
 
 
+# for backwards compatability
+def surface_alt_text(**kwargs):
+    add_alt_text(**kwargs)
+
+
 # TODO: Add option to output alt text as a latex command
 def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_type_classifier="auto",
                       max_subplots=9, include_warnings=False, include_table=False, max_table_rows=20, **kwargs):
@@ -258,9 +264,10 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
         chart_title = fig.get_suptitle()
         if chart_title is not None:
             chart_title = " ".join(chart_title.replace("\n", " ").strip().split())
-        alt_text += f"A figure with {len(flattened_axs)} subplots."
+        alt_text += f"A figure with {len(flattened_axs)} subplots"
         if chart_title != None and chart_title != "":
-            alt_text += f" titled \'{chart_title}\'."\
+            alt_text += f" titled \'{chart_title}\'"
+        alt_text += "."
         # If there are more than max_subplots subplots, only return the suptitle + number
         if len(flattened_axs) > max_subplots:
             return alt_text
@@ -301,7 +308,7 @@ def show_with_alt(alt_text=None, axs=None, fig=None, methods=["html"], chart_typ
     Generates and surfaces starter alt text describing the given figure and axis.
 
     NOTE behavior with plt.show(): show_with_alt() should replace calls to plt.show()...
-    If plt.show() called after surface_alt_text(methods=["html",...]) then the displayed
+    If plt.show() called after add_alt_text(methods=["html",...]) then the displayed
     image will overwrite the version with embedded alt text. If plt.show() is called before
     generate_alt_text, then it will not be able to create alt text because the axs are cleared.
 
@@ -320,7 +327,7 @@ def show_with_alt(alt_text=None, axs=None, fig=None, methods=["html"], chart_typ
         methods (list[str], optional):
             The methods used to display the generated alt text for screen readers.
             Defaults to ["html"]. Currently supported methods are "html", "markdown", "new_cell",
-            "txt_file", "img_file". See surface_alt_text for more details about each method.
+            "txt_file", "img_file". See add_alt_text for more details about each method.
             If "md_table" or "table" is included in methods, a markdown table with the chart's data
             will be included in the alt text.
         desc_level (int, optional):
@@ -354,7 +361,7 @@ def show_with_alt(alt_text=None, axs=None, fig=None, methods=["html"], chart_typ
     if not alt_text:
         alt_text = generate_alt_text(axs=axs, fig=fig, chart_type=chart_type,
                                      desc_level=desc_level, **kwargs)
-    surface_alt_text(alt_text + context, methods=methods, output_file=output_file)
+    add_alt_text(alt_text + context, methods=methods, output_file=output_file)
     # So returned string is not displayed as cell output by default
     plt.clf()
     if return_alt or len(methods) == 0:
@@ -376,7 +383,7 @@ def get_api_chart_type(api_key, base64_img, model="gpt-4-vision-preview", use_az
             Whether the model to query is on Azure. Defaults to False.
 
     Returns:
-        str: The chart type of the given image. Returns "other" if chart type could not be inferred.
+        str: The chart type of the given image. Returns "unknown" if chart type could not be inferred.
     """
     chart_types = list(CHART_TYPE_TO_CLASS.keys())
     prompt = f"You are an expert at classifying charts into one of {len(chart_types)} types: {format_list(chart_types)}. What is the type of this chart?"
@@ -390,13 +397,13 @@ def get_api_chart_type(api_key, base64_img, model="gpt-4-vision-preview", use_az
         if first_word in chart_types:
             return first_word
     else:
-        return "other"
+        return "unknown"
     # Otherwise try and extract the chart type:
     for pattern in CHART_TYPE_ANSWER_PATTERNS:
         matches = re.findall(pattern, api_response)
         if len(matches) > 1:
             return matches[0]
-    return "other"
+    return "unknown"
 
 
 def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=225):
@@ -580,7 +587,7 @@ def show_with_api_alt(api_key=None, prompt=None,
         methods (list[str], optional):
             The methods used to display the generated alt text for screen readers.
             Defaults to ["html"]. Currently supported methods are "html", "markdown", "new_cell",
-            "txt_file", "img_file". See surface_alt_text for more details about each method.
+            "txt_file", "img_file". See add_alt_text for more details about each method.
         use_starter_alt_in_prompt (bool, optional):
             Whether to use heuristic-generated alt text for the current figure in the prompt.
         max_tokens (int, optional):
@@ -611,7 +618,7 @@ def show_with_api_alt(api_key=None, prompt=None,
                          use_starter_alt_in_prompt=use_starter_alt_in_prompt,
                          use_azure=use_azure, max_tokens=max_tokens,
                          **kwargs)
-    surface_alt_text(ai_alt_text + context, methods=methods, output_file=output_file)
+    add_alt_text(ai_alt_text + context, methods=methods, output_file=output_file)
     # So returned string is not displayed as cell output by default
     plt.clf()
     if return_alt or len(methods) == 0:

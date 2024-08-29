@@ -1,7 +1,7 @@
 import utils_gen
 from utils_gen import is_number
 import numpy as np
-from matplotalt import get_ax_ticks_type
+from matplotalt import get_ax_ticks_scale
 
 
 MONTH_STR_TO_NUM = {
@@ -68,8 +68,8 @@ def parse_ax_scales(obj):
 
     first_ax_ticks = [s["text"].replace(',','') for s in firstscale]
     second_ax_ticks = [s["text"].replace(',','') for s in secondscale]
-    first_type = get_ax_ticks_type(first_ax_ticks)
-    second_type = get_ax_ticks_type(second_ax_ticks)
+    first_type = get_ax_ticks_scale(first_ax_ticks)
+    second_type = get_ax_ticks_scale(second_ax_ticks)
     #print(first_ax_ticks, first_type)
     #print(second_ax_ticks, second_type)
     return {'x-scale': [first_type, first_ax_ticks[0], first_ax_ticks[-1]],

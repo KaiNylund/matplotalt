@@ -206,8 +206,9 @@ class ChartDescription():
                     mark_types = f"{mark_type}s"
                 if mark_types == None or len(mark_types) < 1:
                     mark_types = "variables"
-                colors_desc += f"{len(self.chart_dict['var_info'])} {mark_types} are plotted for "
-                colors_desc += format_list(self.chart_dict["var_info"].keys())
+                colors_desc += f"{len(self.chart_dict['var_info'])} {mark_types} are plotted"
+                if len(self.chart_dict["var_info"]) < 16:
+                    colors_desc += " for " + format_list(self.chart_dict["var_info"].keys())
             else:
                 colors_desc_list = []
                 for var_name, var_dict in self.chart_dict["var_info"].items():

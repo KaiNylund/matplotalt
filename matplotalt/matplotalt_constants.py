@@ -12,20 +12,21 @@ LINE_STYLE_TO_DESC = {
 DEFAULT_DESC_CONFIG = {
     "stats": [],
     "trends": [],
-    "sig_figs": 3,
+    "sig_figs": 4,
     "max_color_desc_count": 5,
+    "max_var_stats": 5,
+    "max_var_trends": 5,
     "max_outliers_desc": 3,
-    #"max_line_width": 80,
     "include_annotation_coords": False,
     "include_warnings": False
 }
 
 CHART_TYPE_TO_DESC = {
-    "other":       "An unknown chart type",
+    "other":       "An chart of unknown type",
     "line":        "A line plot",
-    "area":        "An area chart",
     "scatter":     "A scatter plot",
     "bar":         "A bar chart",
+    "image":       "An image",
     "heatmap":     "A heatmap",
     "boxplot":     "A boxplot",
     "sankey":      "A sankey diagram",
@@ -33,7 +34,8 @@ CHART_TYPE_TO_DESC = {
     "pie":         "A pie chart",
     "strip":       "A strip plot",
     "choropleth":  "A choropleth map",
-    "contour":     "A contour plot"
+    "contour":     "A contour plot",
+    "area":        "An area chart",
 }
 
 CHART_TYPE_TO_ID = {

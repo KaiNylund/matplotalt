@@ -5,6 +5,9 @@
 **/.env
 **/.DS_Store
 **/scenegraphs/*
+**/gallery_jupyter/*
+**/gallery_with_alt/*
+**/alt_figs/*
 
 **/.vscode/
 

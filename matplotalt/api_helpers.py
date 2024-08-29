@@ -7,16 +7,20 @@ def get_openai_vision_response(api_key, prompt, base64_img, model="gpt-4-vision-
     if use_azure:
         client = AzureOpenAI(api_key=api_key,
                              api_version=os.getenv("OPENAI_API_VERSION"),
-                             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"))
+                             base_url=os.getenv("AZURE_BASE_URL"))
+                             #azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"))
     else:
         client = OpenAI(api_key=api_key)
+
     response = client.chat.completions.create(
         model=model,
         messages=[
             {
             "role": "user",
             "content": [
-                {"type": "text", "text": prompt},
+                {
+                    "type": "text",
+                    "text": prompt},
                 {
                 "type": "image_url",
                 "image_url": {
@@ -28,6 +32,7 @@ def get_openai_vision_response(api_key, prompt, base64_img, model="gpt-4-vision-
         ],
         max_tokens=max_tokens
     )
+    print(response)
     if return_full_response:
         return response
     return response.choices[0].message.content

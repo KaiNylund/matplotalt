@@ -34,6 +34,8 @@ options:
   -s, --surface_methods
                         How the alt description should be surfaced in the notebook. Choices are 'html', 'markdown',
                         'new_cell', 'txt_file', 'img_file', 'md_table'
+  -so, --surface_output
+                        Output path for img_file and txt_file surface methods
   -ht, --to_html        If given, notebook is also exported to html at the given file path.
   -t TIMEOUT, --timeout TIMEOUT
                         timeout for running each cell

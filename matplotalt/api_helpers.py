@@ -11,7 +11,6 @@ def get_openai_vision_response(api_key, prompt, base64_img, model="gpt-4-vision-
                              #azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"))
     else:
         client = OpenAI(api_key=api_key)
-
     response = client.chat.completions.create(
         model=model,
         messages=[
@@ -32,7 +31,6 @@ def get_openai_vision_response(api_key, prompt, base64_img, model="gpt-4-vision-
         ],
         max_tokens=max_tokens
     )
-    print(response)
     if return_full_response:
         return response
     return response.choices[0].message.content

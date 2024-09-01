@@ -144,11 +144,6 @@ def add_alt_text(alt_text, methods=["html"], output_file=None):
     if is_env_notebook and "new_cell" in methods:
         # Create a new (code) cell with the given alt text
         create_new_cell("%%markdown\n" + alt_text)
-    # Exclude markdown data tables and newlines from the following methods:
-    dt_start_idx = alt_text.lower().find("data table:")
-    if dt_start_idx != -1:
-        alt_text = alt_text[:dt_start_idx]
-    alt_text = alt_text.replace("\n", "")
     # Create output file if needed
     if "txt_file" in methods or "img_file" in methods:
         if not output_file:
@@ -161,6 +156,15 @@ def add_alt_text(alt_text, methods=["html"], output_file=None):
             output_file = os.path.abspath(output_file).split(".")[0]
         if os.path.exists(output_file + ".txt") or os.path.exists(output_file + ".jpg"):
             output_file += "_" + secrets.token_urlsafe(16)
+    # Save alt text to the given output file
+    if "txt_file" in methods:
+        with open(f"{output_file}.txt", "w") as txt_output_f:
+            txt_output_f.write(alt_text)
+    # Exclude markdown data tables and newlines from the following methods:
+    dt_start_idx = alt_text.lower().find("data table:")
+    if dt_start_idx != -1:
+        alt_text = alt_text[:dt_start_idx]
+    alt_text = alt_text.replace("\n", "")
     # Methods that need to draw the figure
     if "html" in methods or "img_file" in methods:
         fig = plt.gcf()
@@ -168,23 +172,19 @@ def add_alt_text(alt_text, methods=["html"], output_file=None):
         pil_img = Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb())
         if "img_file" in methods:
             pil_img.save(output_file + ".jpg", 'JPEG')
-            with open(output_file + ".jpg", 'rb+') as img_f:
-                with pyexiv2.ImageData(img_f.read()) as pyexif_img:
+            with open(output_file + ".jpg", 'rb+') as img_output_f:
+                with pyexiv2.ImageData(img_output_f.read()) as pyexif_img:
                     pyexif_img.modify_exif({"Exif.Image.ImageDescription": alt_text})
                     # Empty the original file
-                    img_f.seek(0)
-                    img_f.truncate()
+                    img_output_f.seek(0)
+                    img_output_f.truncate()
                     # Get the bytes data of the image and save it to the file
-                    img_f.write(pyexif_img.get_bytes())
+                    img_output_f.write(pyexif_img.get_bytes())
         # Display in HTML with the given alt text using a dataURL
         if is_env_notebook and "html" in methods:
             data_url = "data:image/png;base64," + pillow_image_to_base64_string(pil_img)
             plt.close()
             display(HTML(f'<img src="{data_url}" alt="{alt_text}"/>'))
-    if "txt_file" in methods:
-        # Save alt text to the given output file
-        with open(f"{output_file}.txt", "w") as output_file:
-            output_file.write(alt_text)
     plt.show()
 
 
@@ -406,7 +406,7 @@ def get_api_chart_type(api_key, base64_img, model="gpt-4-vision-preview", use_az
     return "unknown"
 
 
-def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=225):
+def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=225, include_colors=True):
     """ Returns a prompt to generate alt text from a figure based on the given description level.
 
     Args:
@@ -427,28 +427,42 @@ def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=225):
     """
     # TODO: provide examples for encodings, chart type, axis ranges,
     base_prompt = "You are a helpful assistant that describes figures. Here are two example descriptions:\n"
-    base_prompt += "1. 'This is a vertical bar chart entitled \'COVID-19 mortality rate by age\' that plots Mortality rate by Age. Mortality rate is plotted on the vertical y-axis from 0 to 15%. Age is plotted on the horizontal x-axis in bins: 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+. The highest COVID-19 mortality rate is in the 80+ age range, while the lowest mortality rate is in 10-19, 20-29, 30-39, sharing the same rate. COVID-19 mortality rate does not linearly correspond to the demographic age. The mortality rate increases with age, especially around 40-49 years and upwards. This relates to people’s decrease in their immunity and the increase of co-morbidity with age. The mortality rate increases exponentially with older people.'\n"
-    base_prompt += "2. 'This is a line chart titled \'Big Tech Stock Prices\' that plots price by date. The corporations include AAPL (Apple), AMZN (Amazon), GOOG (Google), IBM (IBM), and MSFT (Microsoft). The years are plotted on the horizontal x-axis from 2000 to 2010 with an increment of 2 years. The prices are plotted on the vertical y-axis from 0 to 800 with an increment of 200. GOOG has the greatest price over time. MSFT has the lowest price over time. Prices of particular Big Tech corporations seem to fluctuate but nevertheless increase over time. Years 2008-2009 are exceptions as we can see an extreme drop in prices of all given corporations. The big drop in prices was caused by financial crisis of 2007-2008. The crisis culminated with the bankruptcy of Lehman Brothers on September 15, 2008 and an international banking crisis.'\n\n"
+    # Change what info is included in examples based on the desc level
+    if desc_level == 4:
+        base_prompt += "1. 'This is a vertical bar chart entitled \'COVID-19 mortality rate by age\' that plots Mortality rate by Age. Mortality rate is plotted on the vertical y-axis from 0 to 15%. Age is plotted on the horizontal x-axis in bins: 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+. The highest COVID-19 mortality rate is in the 80+ age range, while the lowest mortality rate is in 10-19, 20-29, 30-39, sharing the same rate. COVID-19 mortality rate does not linearly correspond to the demographic age. The mortality rate increases with age, especially around 40-49 years and upwards. This relates to people’s decrease in their immunity and the increase of co-morbidity with age. The mortality rate increases exponentially with older people.'\n"
+        base_prompt += "2. 'This is a line chart titled \'Big Tech Stock Prices\' that plots price by date. The corporations include AAPL (Apple), AMZN (Amazon), GOOG (Google), IBM (IBM), and MSFT (Microsoft). The years are plotted on the horizontal x-axis from 2000 to 2010 with an increment of 2 years. The prices are plotted on the vertical y-axis from 0 to 800 with an increment of 200. GOOG has the greatest price over time. MSFT has the lowest price over time. Prices of particular Big Tech corporations seem to fluctuate but nevertheless increase over time. Years 2008-2009 are exceptions as we can see an extreme drop in prices of all given corporations. The big drop in prices was caused by financial crisis of 2007-2008. The crisis culminated with the bankruptcy of Lehman Brothers on September 15, 2008 and an international banking crisis.'\n\n"
+    elif desc_level == 3:
+        base_prompt += "1. 'This is a vertical bar chart entitled \'COVID-19 mortality rate by age\' that plots Mortality rate by Age. Mortality rate is plotted on the vertical y-axis from 0 to 15%. Age is plotted on the horizontal x-axis in bins: 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+. The highest COVID-19 mortality rate is in the 80+ age range, while the lowest mortality rate is in 10-19, 20-29, 30-39, sharing the same rate. COVID-19 mortality rate does not linearly correspond to the demographic age. The mortality rate increases with age, especially around 40-49 years and upwards. The mortality rate increases exponentially with older people.'\n"
+        base_prompt += "2. 'This is a line chart titled \'Big Tech Stock Prices\' that plots price by date. The corporations include AAPL (Apple), AMZN (Amazon), GOOG (Google), IBM (IBM), and MSFT (Microsoft). The years are plotted on the horizontal x-axis from 2000 to 2010 with an increment of 2 years. The prices are plotted on the vertical y-axis from 0 to 800 with an increment of 200. GOOG has the greatest price over time. MSFT has the lowest price over time. Prices of particular Big Tech corporations seem to fluctuate but nevertheless increase over time. Years 2008-2009 are exceptions as we can see an extreme drop in prices of all given corporations.'\n\n"
+    elif desc_level == 2:
+        base_prompt += "1. 'This is a vertical bar chart entitled \'COVID-19 mortality rate by age\' that plots Mortality rate by Age. Mortality rate is plotted on the vertical y-axis from 0 to 15%. Age is plotted on the horizontal x-axis in bins: 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+. The highest COVID-19 mortality rate is in the 80+ age range, while the lowest mortality rate is in 10-19, 20-29, 30-39, sharing the same rate. COVID-19 mortality rate does not linearly correspond to the demographic age.'\n"
+        base_prompt += "2. 'This is a line chart titled \'Big Tech Stock Prices\' that plots price by date. The corporations include AAPL (Apple), AMZN (Amazon), GOOG (Google), IBM (IBM), and MSFT (Microsoft). The years are plotted on the horizontal x-axis from 2000 to 2010 with an increment of 2 years. The prices are plotted on the vertical y-axis from 0 to 800 with an increment of 200. GOOG has the greatest price over time. MSFT has the lowest price over time.'\n\n"
+    elif desc_level == 1:
+        base_prompt += "1. 'This is a vertical bar chart entitled \'COVID-19 mortality rate by age\' that plots Mortality rate by Age. Mortality rate is plotted on the vertical y-axis from 0 to 15%. Age is plotted on the horizontal x-axis in bins: 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80+.'\n"
+        base_prompt += "2. 'This is a line chart titled \'Big Tech Stock Prices\' that plots price by date. The corporations include AAPL (Apple), AMZN (Amazon), GOOG (Google), IBM (IBM), and MSFT (Microsoft). The years are plotted on the horizontal x-axis from 2000 to 2010 with an increment of 2 years. The prices are plotted on the vertical y-axis from 0 to 800 with an increment of 200.'\n\n"
     #base_prompt = "You are a helpful assistant that describes figures. Here is an example description:\n"
     #base_prompt += "'This is a line chart titled \'Big Tech Stock Prices\' that plots price by date. The corporations include AAPL (Apple), AMZN (Amazon), GOOG (Google), IBM (IBM), and MSFT (Microsoft). The years are plotted on the horizontal x-axis from 2000 to 2010 with an increment of 2 years. The prices are plotted on the vertical y-axis from 0 to 800 with an increment of 200. GOOG has the greatest price over time. MSFT has the lowest price over time. Prices of particular Big Tech corporations seem to fluctuate but nevertheless increase over time. Years 2008-2009 are exceptions as we can see an extreme drop in prices of all given corporations. The big drop in prices was caused by financial crisis of 2007-2008. The crisis culminated with the bankruptcy of Lehman Brothers on September 15, 2008 and an international banking crisis.'\n\n"
     # The part of the prompt describing axis ticks and data
     data_prompt = ""
-    if starter_desc != None:
+    if starter_desc not in ["", None]:
         data_prompt += f"You already know the following information about this figure and its data: '{starter_desc}'.\n\n"
     data_prompt += " Describe this figure."
     # The part of the prompt describing which details to include
+    colors_prompt = ""
+    if include_colors:
+        colors_prompt = "colors, sizes, textures "
     if desc_level == 1:
-        info_prompt = "Only include information about the chart type, colors, sizes, textures, title, axis ranges, and labels."
+        info_prompt = f"Only include information about the chart type, {colors_prompt}title, axis ranges, and labels."
     elif desc_level == 2:
-        info_prompt = "Include information about the chart type, colors, sizes, textures, title, axis ranges, and labels. If possible, describe statistics, extrema, outliers, correlations, and point-wise comparisons between variables."
+        info_prompt = f"Include information about the chart type, {colors_prompt}title, axis ranges, and labels. If possible, describe statistics, extrema, outliers, correlations, and point-wise comparisons between variables."
     elif desc_level == 3:
-        info_prompt = "Include information about the chart type, colors, sizes, textures, title, axis ranges, and labels. If possible, describe statistics, extrema, outliers, correlations, point-wise comparisons, and trends for each plotted variable."
+        info_prompt = f"Include information about the chart type, {colors_prompt} title, axis ranges, and labels. If possible, describe statistics, extrema, outliers, correlations, point-wise comparisons, and trends for each plotted variable."
     elif desc_level == 4:
-        info_prompt = "Include information about the chart type, colors, sizes, textures, title, axis ranges, and labels. If possible, Describe statistics, extrema, outliers, correlations, point-wise comparisons, and trends for each plotted variable. If possible, briefly explain domain-specific insights, current events, and socio-political context that explain the data."
+        info_prompt = f"Include information about the chart type, {colors_prompt}title, axis ranges, and labels. If possible, Describe statistics, extrema, outliers, correlations, point-wise comparisons, and trends for each plotted variable. If possible, briefly explain domain-specific insights, current events, and socio-political context that explain the data."
     else:
         raise ValueError(f"Unsupported desc_level: {desc_level}")
     # Combine the prompt parts
-    full_prompt = f"{base_prompt.strip()} {data_prompt.strip()} {info_prompt.strip()}"
+    full_prompt = f"{base_prompt} {data_prompt.strip()} {info_prompt.strip()}"
     full_prompt += f"Be concise and limit you response to {max_tokens} tokens."
     return full_prompt
 
@@ -457,9 +471,9 @@ def get_desc_level_prompt(desc_level, starter_desc=None, max_tokens=225):
 #       add instructions for creating the env
 # TODO: Add the role: 'You are a helpful assistant you describe figures. Only include statistics based on the given data'
 def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_type=None,
-                         model="gpt-4-vision-preview", use_azure=False,
-                         use_starter_alt_in_prompt=True, include_table=False,
-                         max_tokens=225, **kwargs):
+                          model="gpt-4-vision-preview", use_azure=False,
+                          use_starter_alt_in_prompt=True, include_table=False,
+                          max_tokens=225, include_colors=True, **kwargs):
     """
     Return AI generated alt text for the current figure and axes.
 
@@ -524,21 +538,24 @@ def generate_api_alt_text(api_key, prompt=None, fig=None, desc_level=4, chart_ty
     pil_img = Image.frombytes('RGB', fig.canvas.get_width_height(), fig.canvas.tostring_rgb())
     base64_img = pillow_image_to_base64_string(pil_img)
     # Optionally include starter alt text from a template and/or figure data in the prompt
-    starter_desc = None
+    starter_desc = ""
     data_md_table = ""
     if (use_starter_alt_in_prompt and (prompt in [None, ""])) or include_table:
         chart_desc = generate_alt_text(chart_type=chart_type, desc_level=desc_level,
                                        include_table=include_table, **kwargs)
-        table_start = chart_desc.lower().find("data table:")
+        chart_desc = chart_desc.replace("there are too many data points to fit in a table", "").strip()
+        if use_starter_alt_in_prompt:
+            starter_desc += chart_desc
         # Extract the data table from the chart desc if possible
+        table_start = chart_desc.lower().find("data table:")
         if include_table and table_start != -1:
             data_md_table = "\n\n" + chart_desc[table_start:]
-            chart_desc = chart_desc[:table_start]
-        if use_starter_alt_in_prompt:
-            starter_desc = chart_desc
+            if chart_desc[table_start:].replace("\n", "").strip() != "":
+                starter_desc += "\nThis is a table with data from the chart to describe:" + data_md_table.replace('Data table:\n\n', '')
+            #chart_desc = chart_desc[:table_start]
 
     if prompt in [None, ""]:
-        prompt = get_desc_level_prompt(desc_level, starter_desc=starter_desc, max_tokens=max_tokens)
+        prompt = get_desc_level_prompt(desc_level, starter_desc=starter_desc, max_tokens=max_tokens, include_colors=include_colors)
     api_response = get_openai_vision_response(api_key, prompt, base64_img, model=model,
                                               use_azure=use_azure, max_tokens=max_tokens,
                                               return_full_response=False)

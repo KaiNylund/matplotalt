@@ -136,6 +136,11 @@ def generate_mpl_plot_code(chart_type, chart_data, chart_title,
     elif (is_number(formatted_chart_data[0][0]) and float(formatted_chart_data[0][0]) >= 1000):
         plt_code += "plt.xticks(rotation=45)\n"
 
+    if x_scale_type == "categorical" and len(formatted_x_data) > 20:
+        plt_code += "plt.xticks(fontsize=6)\n"
+    if y_scale_type == "categorical" and len(formatted_y_data) > 20:
+        plt_code += "plt.yticks(fontsize=6)\n"
+
     using_barh = False
     if chart_type == "line":
         plt_code += "plt.plot(chart_data[:, 0], chart_data[:, 1])\n"
@@ -171,9 +176,9 @@ def generate_mpl_plot_code(chart_type, chart_data, chart_title,
             x_tick_min = float(x_tick_min) if is_number(x_tick_min) else x_tick_min
             x_tick_max = float(x_tick_max) if is_number(x_tick_max) else x_tick_max
             if x_tick_min < min_x - np.abs(min_x) * 0.05:
-                plt_code += f"plt.xlim(bottom={x_tick_min})\n"
+                plt_code += f"plt.xlim(left={x_tick_min})\n"
             if x_tick_max > max_x + np.abs(max_x) * 0.05:
-                plt_code += f"plt.xlim(top={x_tick_max})\n"
+                plt_code += f"plt.xlim(right={x_tick_max})\n"
         except Exception as e:
             #print(formatted_x_data)
             #raise e

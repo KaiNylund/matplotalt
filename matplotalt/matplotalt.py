@@ -195,7 +195,8 @@ def surface_alt_text(**kwargs):
 
 # TODO: Add option to output alt text as a latex command
 def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_type_classifier="auto",
-                      max_subplots=9, include_warnings=False, include_table=False, max_table_rows=20, **kwargs):
+                      max_subplots=9, include_warnings=False, include_table=False, max_table_rows=20,
+                      sig_figs=4, **kwargs):
     """
     Args:
         axs (matplotlib.axis.Axis|List[matplotlib.axis.Axis], optional):
@@ -275,9 +276,9 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
         for ax_idx, ax in enumerate(flattened_axs):
             alt_text += f" Subplot {ax_idx + 1}: "
             chart_desc_class = get_cur_chart_desc_class(ax=ax, chart_type=chart_type, chart_type_classifier=chart_type_classifier, include_warnings=include_warnings)
-            alt_text += chart_desc_class.get_chart_desc(desc_level=desc_level, **kwargs)
+            alt_text += chart_desc_class.get_chart_desc(desc_level=desc_level, sig_figs=sig_figs, **kwargs)
             if include_table:
-                alt_text += f" Data table:\n\n{chart_desc_class.get_data_as_md_table(max_rows=max_table_rows)}"
+                alt_text += f" Data table:\n\n{chart_desc_class.get_data_as_md_table(max_rows=max_table_rows, sig_figs=sig_figs)}"
             if ax_idx < len(flattened_axs) - 1:
                 alt_text += "\n\n"
     # Create alt text for a single plot
@@ -291,9 +292,9 @@ def generate_alt_text(axs=None, fig=None, chart_type=None, desc_level=2, chart_t
         else:
             ax = axs
         chart_desc_class = get_cur_chart_desc_class(ax=ax, chart_type=chart_type, chart_type_classifier=chart_type_classifier, include_warnings=include_warnings)
-        alt_text += chart_desc_class.get_chart_desc(desc_level=desc_level, **kwargs)
+        alt_text += chart_desc_class.get_chart_desc(desc_level=desc_level, sig_figs=sig_figs, **kwargs)
         if include_table:
-            alt_text += f" Data table:\n\n{chart_desc_class.get_data_as_md_table(max_rows=max_table_rows)}"
+            alt_text += f" Data table:\n\n{chart_desc_class.get_data_as_md_table(max_rows=max_table_rows, sig_figs=sig_figs)}"
     alt_text = ". ".join([sent.capitalize() for sent in alt_text.split(". ")])
     return alt_text
 

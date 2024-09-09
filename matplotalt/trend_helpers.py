@@ -94,22 +94,22 @@ def _correlation_tf(chart_dict, var_name, ax_name, sig_figs, **kwargs):
         var_ax_data2 = chart_dict["var_info"][var_names[1]]["data"][ax_name]
         return f"{var_names[0]} and {var_names[1]} have a correlation of {format_float(pearsonr(var_ax_data1, var_ax_data2).statistic, sig_figs)}"
     else:
-        max_corr = -2
-        min_corr = 2
-        min_corr_vars = []
-        max_corr_vars = []
+        var_corrs = np.empty((len(num_vars), len(num_vars)))
+        var_corrs.fill(np.nan)
         for i in range(num_vars):
             for j in range(num_vars):
                 var_ax_datai = chart_dict["var_info"][var_names[i]]["data"][ax_name]
                 var_ax_dataj = chart_dict["var_info"][var_names[j]]["data"][ax_name]
-                cur_vars_corr = pearsonr(var_ax_datai, var_ax_dataj).statistic
-                if cur_vars_corr < min_corr:
-                    min_corr = cur_vars_corr
-                    min_corr_vars = [var_names[i], var_names[j]]
-                if cur_vars_corr > max_corr:
-                    min_corr = cur_vars_corr
-                    max_corr_vars = [var_names[i], var_names[j]]
-        return f"{max_corr_vars[0]} and {max_corr_vars[1]} have the highest correlation (r={format_float(max_corr, sig_figs)}), while {min_corr_vars[0]} and {min_corr_vars[1]} have the lowest (r={format_float(min_corr, sig_figs)})"
+                var_corrs[i][j] = pearsonr(var_ax_datai, var_ax_dataj).statistic
+
+        flat_no_nan_corrs = var_corrs.flatten()
+        flat_no_nan_corrs = flat_no_nan_corrs[~np.isnan(flat_no_nan_corrs)]
+        if np.all(np.isclose(flat_no_nan_corrs, flat_no_nan_corrs[0])):
+            return f"All variables have a correlation of {format_float(flat_no_nan_corrs[0], sig_figs)}"
+
+        max_corr_idx = np.unravel_index(np.nanargmax(var_corrs), shape=var_corrs.shape)
+        min_corr_idx = np.unravel_index(np.nanargmin(var_corrs), shape=var_corrs.shape)
+        return f"{var_names[max_corr_idx[0]]} and {var_names[max_corr_idx[1]]} have the highest correlation (r={format_float(var_corrs[max_corr_idx], sig_figs)}), while {var_names[min_corr_idx[0]]} and {var_names[min_corr_idx[0]]} have the lowest (r={format_float(var_corrs[min_corr_idx], sig_figs)})"
 
 
 BASE_TREND_NAME_TO_FUNC = {

@@ -1,3 +1,4 @@
+# Project-specific data directories
 **/matplotlib_output/*
 **/svg_datasets/*
 **/beagle_chart_to_label/*
@@ -8,6 +9,8 @@
 **/gallery_jupyter/*
 **/gallery_with_alt/*
 **/alt_figs/*
+**/matplotlib_ver_imgs/*
+**/vistext_data*.json
 
 **/.vscode/
 

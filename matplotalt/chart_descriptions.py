@@ -149,7 +149,7 @@ class ChartDescription():
 
 
 
-    def get_data_as_md_table(self, max_rows=20):
+    def get_data_as_md_table(self, max_rows=20, sig_figs=4):
         if len(self.chart_dict["ax_info"]) > 0:
             table_dict = {}
             for ax_name, ax_dict in self.chart_dict["ax_info"].items():
@@ -181,7 +181,7 @@ class ChartDescription():
                     if "ticklabels" in self.chart_dict["ax_info"][ax_name] and \
                     data_len == len(self.chart_dict["ax_info"][ax_name]["ticklabels"]):
                         table_dict[f"{ax_label} ticklabels"] = self.chart_dict["ax_info"][ax_name]["ticklabels"]
-            return create_md_table(table_dict)
+            return create_md_table(table_dict, sig_figs=sig_figs)
         return ""
 
 
@@ -268,7 +268,7 @@ class ChartDescription():
         return axes_desc
 
 
-    def get_annotations_desc(self, include_coords=False, sig_figs=4):
+    def get_annotations_desc(self, include_coords=False, max_annotations_desc=5, sig_figs=4):
         """
         Return descriptions of all annotations in the figure with the form:
         'An annotation reads: {annotation_text}'
@@ -283,15 +283,26 @@ class ChartDescription():
             str: The descriptions of each annotation
         """
         annotations_desc = ""
-        for annotation in self.chart_dict["annotations"]:
-            if include_coords:
-                ano_x = format_float(annotation['coords'][0], sig_figs=sig_figs)
-                ano_y = format_float(annotation['coords'][1], sig_figs=sig_figs)
-                coords_desc = f"near x={ano_x}, y={ano_y} "
+        num_annotations = len(self.chart_dict["annotations"])
+        if num_annotations > 0:
+            if num_annotations == 1:
+                annotations_desc += f"An annotation reads "
             else:
-                coords_desc = ""
-            annotations_desc += f"An annotation {coords_desc}reads: '{annotation['text']}'. "
-        return annotations_desc.strip()
+                annotations_desc += f"There are {num_annotations} text annotations. "
+            if num_annotations <= max_annotations_desc:
+                coords_desc_arr = []
+                for annotation in self.chart_dict["annotations"]:
+                    coords_desc = f"'{annotation['text']}'"
+                    if include_coords:
+                        ano_x = format_float(annotation['coords'][0], sig_figs=sig_figs)
+                        ano_y = format_float(annotation['coords'][1], sig_figs=sig_figs)
+                        coords_desc += f" at x={ano_x}, y={ano_y}"
+                    coords_desc_arr.append(coords_desc)
+                annotations_desc += format_list(coords_desc_arr)
+        annotations_desc = annotations_desc.strip()
+        if annotations_desc != "":
+            annotations_desc += "."
+        return annotations_desc
 
 
 
@@ -1139,8 +1150,8 @@ class PieDescription(ChartDescription):
                 self.wedge_labels = self.chart_dict["ax_info"]["y"]["ticklabels"]
 
 
-    def get_data_as_md_table(self, max_rows=20):
-        md_table_str = super().get_data_as_md_table(max_rows=max_rows)
+    def get_data_as_md_table(self, max_rows=20, sig_figs=4):
+        md_table_str = super().get_data_as_md_table(max_rows=max_rows, sig_figs=sig_figs)
         md_table_str = md_table_str.split("\n")
         md_table_str[0] = md_table_str[0].replace("x ticklabels", "slice label").replace("x", "slice value")
         return "\n".join(md_table_str)

@@ -158,7 +158,9 @@ def format_float(f, sig_figs=4, tol=1e-10):
             f = float(f)
         except ValueError:
             return f
-    if isinstance(f, (int, float)):
+    if isinstance(f, (int, float)) or \
+       np.issubdtype(f, np.integer) or \
+       np.issubdtype(f, np.floating):
         if abs(f) < tol:
             f = 0
         return '{:g}'.format(float('{:.{p}g}'.format(f, p=sig_figs)))
@@ -286,13 +288,23 @@ def idx_pt_desc(idxs, chart_dict, var_name, excluded_axis, sig_figs=4):
         var_data = chart_dict["var_info"][var_name]["data"]
         ax_names = list(var_data.keys())
         for i, idx in enumerate(idxs):
-            ax_name_to_idx_labels = {}
+            ax_name_to_idx_labels = OrderedDict()
             for ax_name, ax_dict in ax_info.items():
-                if ax_name != excluded_axis or len(ax_names) == 1:
-                    if "ticklabels" in ax_dict and idx < len(ax_dict["ticklabels"]):
+                if (ax_name != excluded_axis or len(ax_names) == 1) and ax_name in var_data:
+                    if "ticklabels" in ax_dict and len(var_data[ax_name]) <= len(ax_dict["ticklabels"]):
                         ax_name_to_idx_labels[ax_name] = ax_dict["ticklabels"][idx]
-                    elif ax_name in var_data and idx < len(var_data[ax_name]):
+                    # Otherwise if data is evenly spaced and linear, use pts from range min to max
+                    elif "range" in ax_dict and "scale" in ax_dict and ax_dict["scale"] == "linear":
+                        # make sure min/max line up and points are evenly spaced
+                        data_ax_diff = np.diff(var_data[ax_name])
+                        if ax_dict["range"][0] == np.nanmin(var_data[ax_name]) and \
+                           ax_dict["range"][1] == np.nanmax(var_data[ax_name]) and \
+                           np.all(np.isclose(data_ax_diff, data_ax_diff[0])):
+                            ax_name_to_idx_labels[ax_name] = idx * (ax_dict["range"][1] - ax_dict["range"][0]) / len(var_data[ax_name])
+                    # Otherwise use the actual data
+                    if ax_name not in ax_name_to_idx_labels and idx < len(var_data[ax_name]):
                         ax_name_to_idx_labels[ax_name] = var_data[ax_name][idx]
+            # Format idx labels along each axis
             idx_labels = list(ax_name_to_idx_labels.values())
             if len(idx_labels) >= 2:
                 idxs_desc_arr.append(f"({', '.join([str(format_float(ptv, sig_figs)) for ptv in idx_labels])})")

@@ -3,8 +3,8 @@ import matplotlib
 import pandas as pd
 import os
 
-vistext_combined_captions_df = pd.read_json("./vistext_eval/vistext_id_to_200_captions.jsonl", orient='records', lines=True)
-gallery_combined_captions_df = pd.read_json("./matplotlib_gallery/mpl_gallery_combined_captions.jsonl", orient='records', lines=True)
+vistext_combined_captions_df = pd.read_json("./vistext_eval/vistext_id_to_combined_captions.jsonl", orient='records', lines=True)
+gallery_combined_captions_df = pd.read_json("./matplotlib_gallery/mpl_gallery_combined_captions_shuffled.jsonl", orient='records', lines=True)
 
 def display_vistext_img_and_captions(row):
     os.system('cls')
@@ -43,5 +43,5 @@ def display_gallery_img_and_captions(row):
 
 #print(vistext_combined_captions_df)
 
-gallery_combined_captions_df.apply(display_gallery_img_and_captions, axis=1)
-#vistext_combined_captions_df.apply(display_vistext_img_and_captions, axis=1)
+#gallery_combined_captions_df.apply(display_gallery_img_and_captions, axis=1)
+vistext_combined_captions_df.apply(display_vistext_img_and_captions, axis=1)

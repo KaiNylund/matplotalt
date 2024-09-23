@@ -38,14 +38,14 @@ def _shape_tf(chart_dict, var_name, ax_name, generally_thresh=0.65, strictly_thr
     else:
         # Decreasing up to the min
         if pct_dec_up_to_min >= generally_thresh:
-            inc_dec_desc1 = f"decrease to a min at {idx_pt_desc(min_idx, chart_dict, var_name, ax_name, sig_figs=sig_figs)}"
+            inc_dec_desc1 = f"decrease up to their min at {idx_pt_desc(min_idx, chart_dict, var_name, ax_name, sig_figs=sig_figs)}"
             if (pct_dec_up_to_min + pct_flat_up_to_min) >= strictly_thresh:
                 inc_dec_modifier1 = "strictly"
             if pct_flat_up_to_min > 0:
                 inc_dec_modifier1 = "is constant or " + inc_dec_modifier1
         # Increasing up to the max
         elif pct_inc_up_to_max >= generally_thresh:
-            inc_dec_desc1 = f"increase to a max at {idx_pt_desc(max_idx, chart_dict, var_name, ax_name, sig_figs=sig_figs)}"
+            inc_dec_desc1 = f"increase up to their max at {idx_pt_desc(max_idx, chart_dict, var_name, ax_name, sig_figs=sig_figs)}"
             if (pct_inc_up_to_max + pct_flat_up_to_max) >= strictly_thresh:
                 inc_dec_modifier1 = "strictly"
             if pct_flat_up_to_max > 0:
@@ -62,7 +62,7 @@ def _shape_tf(chart_dict, var_name, ax_name, generally_thresh=0.65, strictly_thr
                     if (pct_dec_past_max + pct_flat_past_max) >= strictly_thresh:
                         inc_dec_modifier2 = "strictly"
                     if pct_flat_past_max > 0:
-                        inc_dec_modifier2 = "is constant or " + inc_dec_modifier2
+                        inc_dec_modifier2 = "are constant or " + inc_dec_modifier2
             # Increasing after the min
             elif min_idx != num_pts - 1:
                 pct_inc_past_min = (arr_diff[(min_idx - 1):] > 0).sum() / (num_pts - min_idx - 1)
@@ -72,7 +72,7 @@ def _shape_tf(chart_dict, var_name, ax_name, generally_thresh=0.65, strictly_thr
                     if (pct_inc_past_min + pct_flat_past_min) >= strictly_thresh:
                         inc_dec_modifier2 = "strictly"
                     if pct_flat_past_min > 0:
-                        inc_dec_modifier2 = "is constant or " + inc_dec_modifier2
+                        inc_dec_modifier2 = "are constant or " + inc_dec_modifier2
         if inc_dec_desc2 != "":
             shape_desc += f", then {inc_dec_modifier2} {inc_dec_desc2}"
     #  No clear trends so just describe the pct. increasing, decreasing, and constant

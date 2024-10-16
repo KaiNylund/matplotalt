@@ -1,0 +1,101 @@
+Image ID	Heuristic	turbo L3	turbo heuristic L3	turbo table L3	turbo heuristic + table L3	Chart type	Notes
+614		label error, identity error, value error	deceptive error	label error		bar	errors in heuristic alt text tend not to be corrected by Gpt4-tubro when passed in the prompt
+616						line	
+617	trend error	trend error		value error, identity error, deceptive error		bar	
+634				trend error		line	
+668	chart type error		chart type error		chart type error	area	
+681		value error				line	
+690		label error, deceptive error, trend error	label error			bar	
+706		deceptive error, label error, identity error		label error, cutoff	cutoff	bar	
+741	chart type error	trend error, identity error	chart type error		chart type error, cutoff, unecessary context	area	
+753		trend error, identity error		identity error	nonsense error, cutoff	area	
+762	chart type error	identity error		deceptive error		area	
+765	identity error, trend error	deceptive error	identity error, trend error, deceptive error		trend error	bar	
+780	identity error	identity error	identity error, trend error	identity error, nonsense error	identity error, trend error	bar	
+781		identity error, trend error				bar	
+782	chart type error	deceptive error, value error	chart type error			area	
+783	chart type error	trend error	chart type error		chart type error	area	
+787		value error, grammar error			nonsense error, unecessary context	line	
+797			unecessary context			line	
+824	chart type error	value error	deceptive error		chart type error	area	
+825	repetition, trend error, chart type error	missing context	chart type error	missing context	chart type error	area	
+831	chart type error	missing context			chart type error, deceptive error	area	
+845		chart type error, axis error		missing context		bar	
+856	chart type error	value error	chart type error	nonsense error	chart type error	area	
+867	chart type error, trend error	identity error, trend error, value error	chart type error		chart type error, nonsense error	area	
+869	chart type error		chart type error	deceptive error	chart type error	area	
+871		label error, chart type error	chart type error, unecessary context	chart type error, label error, axis error, deceptive error		bar	
+873		axis error, trend error				bar	
+878	chart type error	label error, trend error, value error		missing context, identity error		area	
+880	chart type error	label error, trend error, missing context		chart type error, label error	chart type error	area	
+923		chart type error, axis error, missing context	grammar error	chart type error, grammar error	chart type error, grammar error	bar	
+941		axis error, label error, trend error		axis error, trend error		line	
+957	trend error, repetition	label error	grammar error	label error		line	frequent mislabeling of titles
+960	chart type error	missing context	chart type error	axis error	chart type error	area	
+964	chart type error, missing context	trend error	chart type error, grammar error, cutoff	axis error	chart type error	area	
+971		missing context		chart type error	deceptive error	bar	
+980	chart type error, missing context	label error, identity error, deceptive error	chart type error	label error, axis error	chart type error	area	
+984	trend error, repetition	trend error, identity error, missing context	trend error			bar	
+995		label error, missing context	axis error	missing context	deceptive error	bar	
+1018	chart type error, trend error, repetition	axis error	chart type error, trend error		chart type error, trend error	area	
+1046		chart type error, missing context	repetition	chart type error		bar	
+1051		label error, missing context	axis error		axis error	bar	
+1073		label error, cutoff			identity error	bar	
+1081		chart type error, axis error	chart type error, axis error	chart type error, axis error, label error		bar	
+1086		trend error, identity error, deceptive error		deceptive error, trend error	deceptive error	bar	
+1088		deceptive error, chart type error, label error, identity error		chart type error		bar	
+1093		chart type error, trend error	chart type error, value error	chart type error		bar	
+1107			deceptive error, trend error	nonsense error	axis error, trend error	bar	
+1111		axis error, identity error, deceptive error				line	
+1121	missing context	identity error, missing context				line	
+1150	chart type error	deceptive error, missing context	chart type error	missing context	chart type error	area	
+1152		label error		label error		line	
+1159	chart type error	label error, identity error		label error, trend error, deceptive error		area	
+1163	missing context		missing context			bar	
+1168						bar	
+1170		label error, identity error, deceptive error, unecessary context, trend error	trend error	unecessary context, deceptive error, cutoff	axis error	bar	
+1186		label error, value error, identity error, chart type error		chart type error, axis error		bar	
+1199	chart type error	chart type error, deceptive error, missing context	chart type error	chart type error, deceptive error	chart type error	area	
+1202	missing context	deceptive error			unecessary context	line	
+1223		chart type error, deceptive error, value error		chart type error, axis error		bar	
+1224		label error, deceptive error, identity error, missing context		label error		bar	
+1226	identity error	trend error, value error	trend error			bar	
+1227		value error		deceptive error		bar	
+1231	trend error, repetition	label error, missing context		label error, value error, identity error		bar	
+1244	chart type error	missing context	chart type error	identity error	chart type error	area	
+1248	chart type error, trend error	value error	chart type error	value error	chart type error	area	
+1249		deceptive error, cutoff		fail	cutoff	bar	turbo-table failed to generate ("responsible ai" violation)
+1283		label error, deceptive error	label error, grammar error	label error, axis error, grammar error	grammar error	bar	
+1293	chart type error, trend error, repetition	missing context	chart type error, trend error	missing context	chart type error, trend error	area	
+1316	chart type error, trend error, repetition	value error, identity error	chart type error, trend error		chart type error	area	
+1347		value error, identity error				line	
+1351	chart type error, trend error, repetition		trend error	missing context	chart type error, trend error	area	
+1358	identity error	missing context	repetition	nonsense error, trend error		bar	
+1374		value error		repetition		line	
+1376		identity error				line	
+1385		missing context	chart type error	chart type error, cutoff	chart type error	bar	
+1388		value error		cutoff		line	
+1389	missing context	label error, deceptive error, identity error		label error, repetition		bar	
+1404		trend error, missing context		trend error, identity error, missing context		line	
+1407		missing context				line	
+1420	chart type error	identity error, missing context	chart type error, trend error	missing context	trend error	area	
+1439	trend error, repetition	deceptive error, trend error, identity error, missing context		chart type error		bar	
+1444	missing context	value error, trend error		identity error	trend error	line	
+1453	trend error	identity error, missing context	trend error	deceptive error	trend error, cutoff	bar	
+1469		identity error, label error		label error, axis error, cutoff		line	
+1481	identity error		identity error, trend error, deceptive error	trend error, nonsense error, deceptive error	axis error	bar	
+1483	chart type error	identity error	chart type error		chart type error	area	
+1497	missing context	identity error			cutoff	line	
+1499	trend error, repetition	label error, axis error, identity error, value error		label error		bar	
+1501	missing context	chart type error, label error, identity error, deceptive error, cutoff	chart type error, label error	chart type error		bar	
+1511	chart type error	missing context, label error	unecessary context, chart type error	label error, missing context		area	x ticklabels overlap
+1512	missing context	chart type error, deceptive error, label error, grammar error, cutoff	grammar error	chart type error, deceptive error, grammar error	missing context, grammar error	bar	
+1513		chart type error, axis error, deceptive error, label error	chart type error, axis error	chart type error, cutoff	cutoff	bar	
+1515		chart type error, trend error, label error, missing context		trend error	trend error	bar	
+1516	chart type error	label error, axis error, missing context, grammar error	unecessary context, grammar error	label error, deceptive error, identity error, grammar error	grammar error	area	
+1542	missing context	chart type error, label error, value error	deceptive error	chart type error, axis error	deceptive error	bar	
+1559		label error, deceptive error		label error, deceptive error	chart type error, axis error	bar	
+1566		label error, missing context	grammar error	value error, identity error, cutoff, grammar error, label error	grammar error	line	
+1567	chart type error, trend error, repetition	identity error, missing context	chart type error, trend error		chart type error, trend error	area	
+1568	identity error	label error, identity error, trend error, missing context	identity error	cutoff, label error		bar	
+1597		label error	axis error	label error, deceptive error		line	

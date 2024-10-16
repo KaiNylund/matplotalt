@@ -554,11 +554,11 @@ class AreaDescription(ChartDescription):
             line = self.lines[0]
             encodings_desc += f" The data are plotted in {LINE_STYLE_TO_DESC[line.get_linestyle()]}{get_color_name(line._color)}. "
         if len(self.vline_xs) == 1:
-            encodings_desc += f" There is a vertical line at x={self.vline_xs[0]}. "
+            encodings_desc += f" There is a vertical line at x={format_float(self.vline_xs[0], sig_figs=sig_figs)}. "
         elif len(self.vline_xs) > 1:
             encodings_desc += f" There are vertical lines at x={format_float_list(self.vline_xs, sig_figs=sig_figs)}. "
         if len(self.hline_ys) == 1:
-            encodings_desc += f" There is a horizontal line at y={self.hline_ys[0]}. "
+            encodings_desc += f" There is a horizontal line at y={format_float(self.hline_ys[0], sig_figs=sig_figs)}. "
         elif len(self.hline_ys) > 1:
             encodings_desc += f" There are horizontal lines at y={format_float_list(self.hline_ys, sig_figs=sig_figs)}. "
         return encodings_desc

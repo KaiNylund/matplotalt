@@ -295,6 +295,7 @@ def idx_pt_desc(idxs, chart_dict, var_name, excluded_axis, sig_figs=4):
                         ax_name_to_idx_labels[ax_name] = ax_dict["ticklabels"][idx]
                     # Otherwise if data is evenly spaced and linear, use pts from range min to max
                     elif "range" in ax_dict and "scale" in ax_dict and ax_dict["scale"] == "linear":
+                        print("scaling")
                         # make sure min/max line up and points are evenly spaced
                         data_ax_diff = np.diff(var_data[ax_name])
                         if ax_dict["range"][0] == np.nanmin(var_data[ax_name]) and \
@@ -303,7 +304,13 @@ def idx_pt_desc(idxs, chart_dict, var_name, excluded_axis, sig_figs=4):
                             ax_name_to_idx_labels[ax_name] = idx * (ax_dict["range"][1] - ax_dict["range"][0]) / len(var_data[ax_name])
                     # Otherwise use the actual data
                     if ax_name not in ax_name_to_idx_labels and idx < len(var_data[ax_name]):
+                        print("Actual data")
                         ax_name_to_idx_labels[ax_name] = var_data[ax_name][idx]
+                        # In the specific case where we have a categorical axis that's just a range, use 1 indexing instead of 0
+                        print("scale" in ax_dict, ax_dict["scale"] in ["categorical", "datetime"], len(var_data[ax_name]) > 0, np.array_equal(var_data[ax_name], list(range(len(var_data[ax_name])))))
+                        if "scale" in ax_dict and ax_dict["scale"] in ["categorical", "datetime"] and len(var_data[ax_name]) > 0 and \
+                            np.array_equal(var_data[ax_name], list(range(len(var_data[ax_name])))):
+                            ax_name_to_idx_labels[ax_name] += 1
             # Format idx labels along each axis
             idx_labels = list(ax_name_to_idx_labels.values())
             if len(idx_labels) >= 2:
@@ -320,5 +327,6 @@ def idx_pt_desc(idxs, chart_dict, var_name, excluded_axis, sig_figs=4):
                     idx_val = var_data[ax_names[0]][idx]
                 if not is_number(idx_val):
                     idxs_desc_arr.append(f"({idx_val})")
+        print(idxs_desc_arr)
         return format_list(idxs_desc_arr)
     return ""

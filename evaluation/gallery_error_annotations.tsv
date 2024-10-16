@@ -1,0 +1,101 @@
+Image ID	Heuristic	turbo L3	turbo heuristic L3	Chart type	Num subplots	Notes
+457	identity error	identity error, cutoff	identity error	line	1	
+357_QgYClV70sWRlSfc6B073Yw	axis error, missing context	missing context	axis error	line	1	
+149_h5XWftnfQWs8NcCzCL4ovw	missing context	deceptive error	cutoff	line	2	
+86_0f2lMsBx3k2T9u0oTVbAxA	chart type error, identity error	label error, value error, deceptive error, identity error	identity error, cutoff	heatmap	1	
+60	missing context			line / area	1	
+86_xHZuZeE-D6wgfxwgQJhyiQ	identity error	deceptive error, axis error, missing context	axis error, identity error, cutoff	heatmap	4	
+9	identity error	chart type error, deceptive error	identity error	line	1	
+423				line	1	
+341	missing context, repetition	cutoff	cutoff	line	4	
+145	missing context, repetition	deceptive error		polar line	9	
+68	missing context	unecessary context	identity error, nonsense error	image	2	
+35	axis error, missing context, identity error	label error, missing context, value error	axis error, identity error, missing context	line	1	
+161_BOj5_RD5KvdKi6TUCvX0ZQ	missing context	label error, deceptive error		line	1	
+248	chart type error, cutoff, nonsense error, missing context	axis error, unecessary context		line	1	
+406	missing context	chart type error		line	1	
+357_R67tHkf3gwIcJHKP8BRdKg	missing context, identity error		identity error	line	1	
+250	repetition, missing context	deceptive error	cutoff	pie	1	
+149	missing context		cutoff	line	2	
+385_NU_AwQ0lYmBkgzW-FeDTOA	missing context	trend error, deceptive error, cutoff, value error	cutoff	line	2	
+81	missing context	deceptive error	deceptive error, identity error, cutoff	contour / image	1	
+206	identity error, missing context, trend error			3D line	1	
+154_TJ6JCAKG44BiizuhjJOZ8g	axis error, missing context	identity error		scatter	1	
+417_T8vWMZ2P82zkiG4dPGkesQ	identity error, repetition, missing context, value error	value error, cutoff	cutoff	line	3	
+408_2_hCUgaWzDlvTutekWLdiw	repetition	deceptive error		line	2	
+255	value error		value error	line	1	
+193_AeHOWzVAA2M5vfs0Hsuxqw	missing context, identity error	chart type error, deceptive error	identity error, deceptive error	line	1	
+83	missing context	axis error, deceptive error	deceptive error, cutoff	contour	1	
+279	missing context	trend error		scatter	1	
+150				scatter	1	
+152	missing context, trend error	deceptive error		scatter / line	1	
+451	missing context	chart type error		line	144	
+343	chart type error, missing context, repetition, axis error, deceptive error	missing context	nonsense error, axis error	line	2	
+298	missing context	chart type error, cutoff	cutoff	image	12	
+382	axis error	cutoff	cutoff, axis error	line	2	
+371	missing context			line	1	
+153	missing context, repetition, axis error	cutoff	cutoff, axis error, unecessary context	scatter	6	
+367_IHWkXNYlo5q070oCvSh7GQ	missing context	deceptive error	cutoff	line	4	
+92	missing context	unecessary context	cutoff, identity error, deceptive error	contour / image	1	
+300	chart type error, identity error	deceptive error, trend error	identity error, trend error, axis error	line	3	
+89_zlP_4iGSAavMUJapiwqDhw	missing context, repetition			image	3	
+309		value error	deceptive error	boxplot	1	
+297	axis error	deceptive error	deceptive error	line	1	
+8	missing context	chart type error, axis error, cutoff, deceptive error	chart type error, axis error, deceptive error, cutoff	image / heatmap	12	
+1	repetition	chart type error, deceptive error, cutoff	cutoff	image / heatmap	5	
+247	value error, missing context	axis error, deceptive error	value error	radial scatter	1	
+333	repetition, value error, identity error	deceptive error, cutoff	label error, trend error, value error	line	4	
+44	missing context			line	1	
+40	missing context, repetition	deceptive error, axis error	axis error, cutoff	image / heatmap	3	
+426	axis error, identity error			line	1	
+154_edld6gSjaDHd6J8nobxalQ	missing context			scatter	1	
+413_X3P5cXeY_2V_OdAScDtqVQ	missing context			scatter	1	
+24		identity error, unecessary context		line	1	
+46_JSWfKWlk_WDC8f-4Gfx6nw	missing context	cutoff		line	1	
+219	missing context	deceptive error	missing context, cutoff	3D scatter	1	
+282	identity error, missing context		identity error	line	1	
+491	missing context	value error, deceptive error	deceptive error	scatter	1	
+412		deceptive error		line	1	
+417_om3xKsHE9k6UdD29R7Nc-A	value error, identity error, missing context, repetition		deceptive error, value error	line	3	
+87_hIe56HOXlQjVmUYFA-eIJQ	missing context	deceptive error	cutoff	image	1	
+98			cutoff, deceptive error	image	4	
+4		axis error	identity error, cutoff	image / heatmap	2	
+50	trend error, repetition			line	1	
+250	missing context			line	1	
+103	missing context, repetition		cutoff	image	3	
+327	missing context			line	1	
+79	missing context		deceptive error	contour	1	
+359	missing context	deceptive error	cutoff	line	2	
+408_GPCEZXKsz9KPnoy6q0rQ_Q	repetition	label error		line	2	
+400	identity error	missing context	identity error	bar / histogram	1	
+87_g3n-NNUVyMaRVfkhzaPX4Q	missing context, repetition	deceptive error, cutoff	deceptive error	image	2	
+93		identity error		image / heatmap	1	
+137	chart type error, value error, identity error, missing context	identity error	value error, identity error	bar	1	
+161	missing context		label error, deceptive error	line	1	
+169	missing context, repetition, identity error	deceptive error, cutoff	identity error, missing context	line	3	
+285	missing context	cutoff	cutoff	line	1	
+360	repetition	chart type error, deceptive error, cutoff		image / heatmap	5	
+34	repetition	cutoff		line	2	
+97	missing context			image / heatmap	1	
+425	missing context			line	1	many sinusoidal graphs that are missed by the heuristic alt text
+170	value error	missing context	value error	line	1	
+89	missing context	identity error		image	1	
+396	identity error	chart type error, cutoff	identity error	line	1	
+360_xudQEPHsMlrSamDy1OjvlA	repetition	axis error, cutoff	missing context, cutoff	image	5	
+65	missing context	identity error		line	1	
+241_Wy2NwHTciaMPyXEwOx3AZg	repetition, missing context		identity error	pie	1	
+94	missing context	deceptive error, cutoff	cutoff	image	18	
+361_OycMkJTfrslBZIN0pMQ5-g	missing context			line	2	
+417_452-UTnzO1y4jrMpmekGCg	value error, identity error, missing context, repetition	cutoff	label error, cutoff	line	3	
+335_o5rM761bfq5VEq_FxZ1P7g	chart type error		trend error, cutoff, identity error	line	2	
+405	missing context			line	1	
+125	identity error	identity error	cutoff	line	2	
+7	repetition		identity error, trend error, cutoff	heatmap / image	2	
+334				line	1	
+328	missing context	value error, unecessary context		line	1	
+211	missing context	deceptive error		line	1	
+75	missing context, axis error, repetition	axis error	cutoff	image	2	
+434				line	1	
+186	missing context	axis error	cutoff	heatmap / line / contour	3	
+220	missing context		deceptive error	3D line	1	
+262	missing context, trend error, repetition		cutoff	line	3	

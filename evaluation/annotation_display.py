@@ -4,11 +4,13 @@ import pandas as pd
 import os
 
 vistext_combined_captions_df = pd.read_json("./vistext_eval/vistext_id_to_combined_captions.jsonl", orient='records', lines=True)
+vistext_t5_combined_captions_df = pd.read_json("./vistext_models_eval/vistext_t5_imageguided_captions.jsonl", orient='records', lines=True)
 gallery_combined_captions_df = pd.read_json("./matplotlib_gallery/mpl_gallery_combined_captions_shuffled.jsonl", orient='records', lines=True)
 
 # Drop rows used for initial error type annotation
 vistext_combined_captions_df = vistext_combined_captions_df.iloc[50:]
 gallery_combined_captions_df = gallery_combined_captions_df.iloc[50:]
+vistext_image_ids = list(vistext_combined_captions_df["image_id"])
 
 def display_vistext_img_and_captions(row):
     os.system('cls')
@@ -34,6 +36,7 @@ def display_vistext_img_and_captions(row):
     plt.imshow(vistext_img)
     plt.show()
 
+
 def display_gallery_img_and_captions(row):
     os.system('cls')
     gallery_img = matplotlib.image.imread(f"./matplotlib_gallery/alt_figs/nb_{row['figure_id']}.jpg")
@@ -51,5 +54,23 @@ def display_gallery_img_and_captions(row):
 
 #print(vistext_combined_captions_df)
 
-gallery_combined_captions_df.apply(display_gallery_img_and_captions, axis=1)
+#gallery_combined_captions_df.apply(display_gallery_img_and_captions, axis=1)
 #vistext_combined_captions_df.apply(display_vistext_img_and_captions, axis=1)
+
+for image_id in vistext_image_ids:
+    row = vistext_t5_combined_captions_df.loc[vistext_t5_combined_captions_df['image_id'] == image_id].iloc[0]
+    os.system('cls')
+    vistext_img = matplotlib.image.imread(f"./vistext_eval/vistext_images/{image_id}.png")
+    print("------------------------------------------------------------------------------")
+    print(f"Image ID: {image_id}")
+    print("------------------------------------------------------------------------------")
+    #for i, hcap in enumerate(row["human"]):
+    #    print(f"Human caption {i}: {hcap}")
+    #    print("------------------------------------------------------------------------------")
+    print(f"VL-T5 imageonly: {row['t5-imageguided-imageonly']}")
+    print("------------------------------------------------------------------------------")
+    print(f"VL-T5 image + datatable: {row['t5-imageguided-datatable']}")
+    print("------------------------------------------------------------------------------")
+    print(f"VL-T5 image + scenegraph: {str(row['t5-imageguided-scenegraph'])}")
+    plt.imshow(vistext_img)
+    plt.show()
